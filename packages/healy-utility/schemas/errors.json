@@ -16,6 +16,10 @@
 			},
 			"message": {
 				"type": "string"
+			},
+			"value": {},
+			"type": {
+				"type": "string"
 			}
 		},
 		"required": ["sheetName", "columnName", "id", "message"]

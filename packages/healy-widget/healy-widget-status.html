@@ -6,6 +6,7 @@
 <link rel="import" href="../nodecg-replicant/nodecg-replicant.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../polymer/lib/mixins/mutable-data.html">
+<link rel="import" href="healy-widget-error.html">
 
 <dom-module id="healy-widget-status">
 	<template>
@@ -146,6 +147,13 @@
 				margin-bottom: 18px;
 			}
 
+			#errorsList {
+				font-size: 14px;
+				font-weight: 500;
+				margin-top: 1em;
+				overflow: auto;
+			}
+
 			[hidden] {
 				display: none !important;
 			}
@@ -220,7 +228,13 @@
 			</div>
 
 			<div id="errorsList" data-source="errors">
-				Errors will be listed here.
+				<template is="dom-repeat" items="[[_slice(importerErrors, 0, 5)]]" as="error" mutable-data>
+					<healy-widget-error error="[[error]]"></healy-widget-error>
+				</template>
+
+				<div id="additionalErrors" hidden="[[_calcAdditionalErrorsHidden(numAdditionalErrors)]]">
+					([[numAdditionalErrors]] additional errors)
+				</div>
 			</div>
 		</iron-pages>
 	</template>

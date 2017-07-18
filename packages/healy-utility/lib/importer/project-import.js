@@ -54,18 +54,16 @@ function handleProjectImport(project) {
 					sheetName: datasetName,
 					columnName,
 					id: parentObject.id || 'Unknown',
-					message: error.message
+					message: error.message,
+					value: error.value,
+					type: error.type
 				};
 
+				// Errors in player objects are a special case, because the way we store players/rosters is
+				// completely different from how the sheet stores them. This means that we have to do a
+				// little extra work to map these errors back to the sheet in a way that makes sense.
 				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
 					errorReport.sheetName = 'players';
-					errorReport.id = parentObject.user_id;
-				}
-
-				if (error.message === 'is the wrong type') {
-					errorReport.message = `Value "${error.value}" is a "${typeof error.value}", expected a "${error.type}"`;
-				} else if (error.message === 'has additional properties') {
-					errorReport.message = `Has these additional properties: ${error.value.replace(/^data\./g, '')}`;
 				}
 
 				validationErrors.push(errorReport);
