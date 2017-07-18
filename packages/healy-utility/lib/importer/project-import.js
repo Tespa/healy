@@ -1,5 +1,8 @@
 'use strict';
 
+const PLAYER_IN_ROSTER_REGEX = /^[\d]+\.roster\.[\d]+/;
+const COLUMN_NAME_REGEX = /\.\w+$/;
+
 // Packages
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
 
@@ -29,48 +32,50 @@ function handleProjectImport(project) {
 
 	// On the first loop, just validate. We do an atomic update where we only
 	// update the replicants if every single one of them passes validation with their new value.
-	for (const sheetName in importerOptions.replicantMappings) {
-		if (!{}.hasOwnProperty.call(importerOptions.replicantMappings, sheetName)) {
+	for (const datasetName in importerOptions.replicantMappings) {
+		if (!{}.hasOwnProperty.call(importerOptions.replicantMappings, datasetName)) {
 			continue;
 		}
 
-		if (!{}.hasOwnProperty.call(project, sheetName)) {
+		if (!{}.hasOwnProperty.call(project, datasetName)) {
 			// TODO: error here.
 		}
 
-		const replicant = importerOptions.replicantMappings[sheetName];
-		console.log('validating %s against sheet %s', replicant.name, sheetName);
-		const result = replicant.validate(project[sheetName], {
+		const replicant = importerOptions.replicantMappings[datasetName];
+		const result = replicant.validate(project[datasetName], {
 			throwOnInvalid: false
 		});
-		console.log('\tresult:', result);
 
 		if (!result) {
-			// TODO: these are just strings. Is that how I want the final thing to be?
 			replicant.validationErrors.forEach(error => {
-				const field = error.field.replace('data.', '');
-				const rowNum = field.match(/^[\d]+[\\.]/)[0].replace('.', '');
-				const columnName = field.match(/[\\.]\w+$/)[0].replace('.', '');
-				if (error.message === 'is the wrong type') {
-					validationErrors.push({
-						sheetName,
-						rowNum: parseInt(rowNum, 10),
-						columnName,
-						message: `Cell `
-					});
-					validationErrors.push(`Field "${field}" ${error.message}. Value "${error.value}" (type: ${typeof error.value}) was provided, expected type "${error.type}"\n `);
-				} else if (error.message === 'has additional properties') {
-					validationErrors.push(`Field "${field}" ${error.message}: "${error.value}"\n`);
-				} else {
-					validationErrors.push(`Field "${field}" ${error.message}\n`);
+				const field = error.field.replace(/^data\./, '');
+				const columnName = field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
+				const errorReport = {
+					sheetName: datasetName,
+					columnName,
+					id: error.value.id
+				};
+
+				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
+					errorReport.datasetName = 'players';
+					errorReport.id = error.value.user_id;
 				}
+
+				if (error.message === 'is the wrong type') {
+					errorReport.message = `Value "${error.value}" is a "${typeof error.value}", expected a "${error.type}"`;
+				} else {
+					validationErrors.push(error.message);
+				}
+
+				validationErrors.push(errorReport);
 			});
 		}
 	}
 
+	replicants.errors.value = validationErrors;
+
 	if (validationErrors.length > 0) {
 		emitter.emit('importFailed', validationErrors);
-		replicants.errors.value = validationErrors;
 	} else {
 		// Loop again, and do the actual assignments this time.
 		for (const sheetName in importerOptions.replicantMappings) {

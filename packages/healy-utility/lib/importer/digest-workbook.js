@@ -20,6 +20,7 @@ module.exports = function (workbook) {
 			return;
 		}
 
+		// Normalize all column names to snake_case.
 		const columnNames = sheet.values[0].map(columnName => {
 			columnName = _snakeCase(columnName);
 

@@ -11,6 +11,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "cacache": "^9.2.9",
+    "eventemitter2": "^4.1.2",
     "google-auth-library": "^0.10.0",
     "google-spreadsheets-key-parser": "^1.1.0",
     "googleapis": "^20.1.0",

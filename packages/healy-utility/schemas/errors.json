@@ -2,6 +2,22 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"type": "array",
 	"items": {
-		"type": "string"
+		"type": "object",
+		"additionalProperties": false,
+		"properties": {
+			"sheetName": {
+				"type": "string"
+			},
+			"columnName": {
+				"type": "string"
+			},
+			"id": {
+				"type": ["string", "number"]
+			},
+			"message": {
+				"type": "string"
+			}
+		},
+		"required": ["sheetName", "columnName", "id", "message"]
 	}
 }
