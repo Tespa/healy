@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+	<title>healy-widget test</title>
+
+	<script src="../../webcomponentsjs/webcomponents-loader.js"></script>
+	<script src="../../web-component-tester/browser.js"></script>
+	<script src="../../mock-nodecg/dist/mock-nodecg.js"></script>
+	<script>
+		/* global MockNodeCG */
+		window.nodecg = new MockNodeCG();
+	</script>
+
+	<link rel="import" href="../healy-widget.html">
+</head>
+<body>
+	<test-fixture id="healy-widget">
+		<template>
+			<healy-widget></healy-widget>
+		</template>
+	</test-fixture>
+
+	<!-- Normally I'd not inline this script, but it fails when I do that. -->
+	<!-- Guessing that's a bug in web-component-tester. -->
+	<script>
+		/* eslint-env mocha */
+		/* global fixture */
+
+		suite('healy-widget', () => {
+			let widget;
+			let shadowRoot; // eslint-disable-line no-unused-vars
+
+			setup(() => {
+				widget = fixture('healy-widget');
+				shadowRoot = widget.shadowRoot;
+				Polymer.flush();
+			});
+
+			test('empty', () => {
+
+			});
+		});
+	</script>
+</body>
+</html>

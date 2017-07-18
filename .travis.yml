@@ -1,0 +1,27 @@
+sudo: required
+language: node_js
+node_js: '7'
+cache:
+  apt: true
+  directories:
+  - node_modules
+  - packages/healy-utility/node_modules
+  - packages/healy-widget/node_modules
+  - packages/healy-widget/bower_components
+  - "$HOME/.npm"
+addons:
+  firefox: latest
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+before_install:
+  - npm install -g bower
+  - npm install -g lerna@^2
+  - lerna bootstrap
+script:
+  # Run our tests with virtual X frame buffer, needed for the selenium browser tests
+  - xvfb-run npm test
+after_success: npm run coverage
+dist: trusty

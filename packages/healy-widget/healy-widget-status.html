@@ -1,0 +1,222 @@
+<link rel="import" href="../html-echo/html-echo.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../polymer/lib/mixins/mutable-data.html">
+
+<dom-module id="healy-widget-status">
+	<template>
+		<style include="iron-flex iron-flex-alignment">
+			:host {
+				height: 180px;
+				font-family: Roboto, sans-serif;
+				@apply --layout-flex-none;
+				@apply --layout-vertical;
+			}
+
+			#importStatus {
+				@apply --layout-horizontal;
+				@apply --layout-center;
+			}
+
+			#sourceIcon {
+				width: 40px;
+				height: 40px;
+				margin-right: 12px;
+				@apply --layout-flex-none;
+			}
+
+			#top {
+				font-size: 18px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			#bottom {
+				font-size: 16px;
+				font-style: italic;
+			}
+
+			#pages {
+				margin-right: 12px;
+				@apply --layout-flex;
+				@apply --layout-vertical;
+			}
+
+			#meter {
+				position: relative;
+				width: 100%;
+				height: 10px;
+				background: #DEDEDE;
+				margin-top: 16px;
+				margin-bottom: 10px;
+				overflow: hidden;
+			}
+
+			#meter-fill,
+			#meter-indeterminate {
+				position: absolute;
+				top: 0;
+				height: 100%;
+			}
+
+			#meter-fill {
+				left: 0;
+				width: 100%;
+				transform: scaleX(0);
+				transform-origin: left;
+				will-change: transform;
+				background: #5BA664;
+			}
+
+			#meter-indeterminate {
+				left: -86px;
+				width: calc(100% + 86px);
+				background: url("img/progress_load.png") repeat-x;
+				animation: scrollRight 0.6s linear infinite;
+			}
+
+			@keyframes scrollRight {
+				0% {
+					transform: translateX(0px);
+				}
+				100% {
+					transform: translateX(86px);
+				}
+			}
+
+			.meter-label {
+				@apply --layout-flex;
+			}
+
+			.meter-label-top {
+				font-size: 16px;
+				line-height: 10px;
+				font-variant-numeric: tabular-nums;
+				-moz-font-feature-settings: "tnum";
+				-webkit-font-feature-settings: "tnum";
+				font-feature-settings: "tnum";
+			}
+
+			.meter-label-bottom {
+				font-size: 13px;
+			}
+
+			#manualUpdate {
+				width: 265px;
+				height: 40px;
+				align-self: center;
+				margin-top: auto;
+				--paper-button: {
+					color: white;
+					background-color: #5BA664;
+				}
+			}
+
+			#zipWarning {
+				color: white;
+				background-color: #C4C4C4;
+				height: 75px;
+				width: 100%;
+				text-align: center;
+				white-space: nowrap;
+				font-weight: 500;
+				margin-top: auto;
+				@apply --layout-vertical;
+				@apply --layout-center-center;
+			}
+
+			#noneWarning {
+				width: 100%;
+				color: white;
+				text-align: center;
+				background-color: #FF9797;
+				@apply --layout-vertical;
+				@apply --layout-center-center;
+				@apply --layout-flex;
+			}
+
+			#noneWarning iron-icon {
+				width: 48px;
+				height: 48px;
+				margin-bottom: 18px;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+		</style>
+
+		<div id="importStatus" hidden="[[_calcImportStatusHidden(metadata)]]">
+			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source)]]"></iron-icon>
+
+			<div class="layout vertical flex" style="min-width: 1px;">
+				<div id="top">
+					<html-echo html="[[_calcTopHtml(metadata)]]"></html-echo>
+				</div>
+
+				<div id="bottom">[[_calcBottomText(metadata)]]</div>
+			</div>
+		</div>
+
+		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata)]]">
+			<div class="layout vertical flex" data-source="googleDrive">
+				<div id="meter">
+					<div id="meter-fill"></div>
+					<div id="meter-indeterminate" hidden="[[!metadata.updating]]"></div>
+				</div>
+
+				<div class="layout horizontal">
+					<div class="meter-label layout vertical start">
+						<div class="meter-label-top">[[timeSinceLastPoll]]</div>
+						<div class="meter-label-bottom">Elapsed</div>
+					</div>
+
+					<div class="meter-label layout vertical center">
+						<div class="meter-label-top">[[timeSinceLastModified]]</div>
+						<div class="meter-label-bottom">Last Modified</div>
+					</div>
+
+					<div class="meter-label layout vertical end" style="color: #5BA664;">
+						<div class="meter-label-top">[[timeToNextPoll]]</div>
+						<div class="meter-label-bottom">Next Poll</div>
+
+					</div>
+				</div>
+
+				<paper-button id="manualUpdate" on-tap="manualUpdate" raised disabled="[[metadata.updating]]">
+					Manual Update
+				</paper-button>
+			</div>
+
+			<div class="layout vertical flex" data-source="zip">
+				<div style="margin-top: 12px;">
+					<b>Imported on:</b>
+					[[formatDate(metadata.lastPollTime)]]
+				</div>
+
+				<div>
+					<b>Last Modified:</b>
+					[[formatDate(metadata.modifiedTime)]]
+				</div>
+
+				<div id="zipWarning">
+					<span>You are currently using a local file as your primary data source.</span>
+					<span>This data can only be updated by reuploading. Import a Google Sheet</span>
+					<span>in order to enable regular polling updates.</span>
+				</div>
+			</div>
+
+			<div id="noneWarning" data-source="none">
+				<iron-icon src="[[importPath]]/img/none-icon.svg"></iron-icon>
+				<span style="font-size: 18px; font-weight: 900;">No Data Source!</span>
+				<span style="font-size: 16px; font-style: italic;">Upload ZIP or link Google Sheet</span>
+			</div>
+		</iron-pages>
+	</template>
+
+	<script src="healy-widget-status.js"></script>
+</dom-module>

@@ -1,0 +1,42 @@
+{
+	"plugins": {
+		"local": {
+			"browsers": [
+				"chrome"
+			]
+		},
+		"sauce": {
+			"disabled": true,
+			"browsers": [
+				{
+					"browserName": "chrome",
+					"platform": "Windows 10",
+					"version": "latest"
+				},
+				{
+					"browserName": "safari",
+					"platform": "macOS 10.12",
+					"version": "latest"
+				}
+			]
+		},
+		"istanbul": {
+			"dir": "coverage",
+			"reporters": [
+				"json",
+				"html",
+				"text"
+			],
+			"include": [
+				"**/healy-widget.html",
+				"**/healy-widget.js",
+				"**/healy-widget-status.html",
+				"**/healy-widget-status.js"
+			],
+			"exclude": [
+				"/bower_components/**/*",
+				"/test/**/*"
+			]
+		}
+	}
+}

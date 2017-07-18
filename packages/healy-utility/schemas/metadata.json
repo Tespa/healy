@@ -1,0 +1,31 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"title": {
+			"type": "string"
+		},
+		"id": {
+			"type": ["string", "null"]
+		},
+		"url": {
+			"type": ["string", "null"]
+		},
+		"source": {
+			"type": "string",
+			"enum": ["googleDrive", "zip", "none"],
+			"default": "none"
+		},
+		"modifiedTime": {
+			"type": "number"
+		},
+		"lastPollTime": {
+			"type": "number"
+		},
+		"updating": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}

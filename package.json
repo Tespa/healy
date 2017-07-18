@@ -1,0 +1,43 @@
+{
+  "name": "healy",
+  "devDependencies": {
+    "eslint": "^4.2.0",
+    "eslint-config-xo": "^0.18.2",
+    "eslint-plugin-ava": "^4.2.0",
+    "eslint-plugin-html": "^3.1.0",
+    "lerna": "^2.0.0"
+  },
+  "scripts": {
+    "pretest": "eslint packakges/**/*.js packages/**/*.html",
+    "test": "lerna run test",
+    "postinstall": "lerna bootstrap",
+    "coverage": "echo \"No coverage yet.\""
+  },
+  "dependencies": {
+    "eventemitter2": "^4.1.2",
+    "express": "^4.15.3"
+  },
+  "eslintConfig": {
+    "extends": "xo/esnext",
+    "plugins": [
+      "html"
+    ],
+    "rules": {
+      "new-cap": [
+        2,
+        {
+          "capIsNewExceptions": [
+            "Polymer",
+            "nodecg.Replicant"
+          ]
+        }
+      ]
+    }
+  },
+  "nyc": {
+    "reporter": [
+      "html",
+      "text"
+    ]
+  }
+}

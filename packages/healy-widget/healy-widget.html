@@ -1,0 +1,105 @@
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../nodecg-replicant/nodecg-replicant.html">
+<link rel="import" href="../nodecg-toast/nodecg-toast.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../paper-styles/shadow.html">
+<link rel="import" href="../polymer/lib/mixins/mutable-data.html">
+<link rel="import" href="../vaadin-upload/vaadin-upload.html">
+<link rel="import" href="healy-widget-status.html">
+
+<dom-module id="healy-widget">
+	<template>
+		<style include="iron-flex iron-flex-alignment">
+			:host {
+				display: block;
+			}
+
+			#urlInput {
+				@apply --layout-flex;
+			}
+
+			#takeButton {
+				margin-right: 13px;
+				margin-left: 12px;
+				--paper-button: {
+					color: white;
+					background-color: #5BA664;
+				}
+			}
+
+			#spinner {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+			}
+
+			:host([importing]) #takeButton-label {
+				opacity: 0;
+			}
+
+			paper-button {
+				width: 156px;
+				height: 40px;
+			}
+
+			#upload {
+				--vaadin-upload-button-add: {
+					width: 156px;
+					height: 40px;
+					font-size: 16px;
+					background-color: #5BA664;
+					margin-left: 0;
+					margin-right: -4px;
+				}
+			}
+
+			#status {
+				margin-top: 9px;
+				margin-left: 12px;
+			}
+		</style>
+
+		<nodecg-replicant replicant-name="importer:metadata" value="{{metadata}}"></nodecg-replicant>
+
+		<div class="layout horizontal center">
+			<paper-button
+				id="takeButton"
+				raised
+				on-tap="take"
+				disabled="[[_calcGoogleImportButtonDisabled(importing, urlInputValue)]]">
+
+				<span id="takeButton-label">Import Sheet</span>
+				<paper-spinner-lite
+					id="spinner"
+					alt="Importing Google Sheet"
+					active="[[importing]]"
+					hidden="[[!importing]]"></paper-spinner-lite>
+			</paper-button>
+
+			<paper-input
+				id="urlInput"
+				label="Google Sheets URL"
+				disabled="[[importing]]"
+				value="{{urlInputValue}}"></paper-input>
+		</div>
+
+		<vaadin-upload
+			id="upload"
+			max-files="1"
+			target="[[zipUploadUrl]]"
+			on-upload-request="_onUploadRequest"
+			accept=".zip">
+			<span slot="drop-label">Drop .zip file here...</span>
+		</vaadin-upload>
+
+		<healy-widget-status id="status" metadata="[[metadata]]"></healy-widget-status>
+
+		<nodecg-toast id="toast"></nodecg-toast>
+	</template>
+
+	<script src="healy-widget.js"></script>
+</dom-module>

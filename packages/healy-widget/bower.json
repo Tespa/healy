@@ -1,0 +1,47 @@
+{
+  "name": "healy-widget",
+  "authors": [
+    "Alex Van Camp <vancamp.alex@gmail.com>"
+  ],
+  "main": "healy-widget.html",
+  "keywords": [
+    "nodecg",
+    "utility",
+    "ui",
+    "polymer"
+  ],
+  "private": true,
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "wct.conf.json"
+  ],
+  "dependencies": {
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
+    "nodecg-replicant": "NodeCGElements/nodecg-replicant#1.0.0",
+    "nodecg-toast": "NodeCGElements/nodecg-toast#1.0.0",
+    "paper-button": "PolymerElements/paper-button#^2.0.0",
+    "paper-input": "PolymerElements/paper-input#^2.0.1",
+    "paper-spinner": "PolymerElements/paper-spinner#^2.0.0",
+    "vaadin-upload": "vaadin/vaadin-upload#v2.0.0",
+    "html-echo": "Collaborne/html-echo#^1.0.1",
+    "iron-pages": "PolymerElements/iron-pages#^2.0.0"
+  },
+  "devDependencies": {
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
+    "test-fixture": "PolymerElements/test-fixture#3.0.0-rc.1",
+    "web-component-tester": "Lange/web-component-tester#patch-1",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
+    "paper-toast": "PolymerElements/paper-toast#^2.0.0",
+    "mock-nodecg": "nodecg/mock-nodecg#^1.0.1"
+  },
+  "resolutions": {
+    "polymer": "^2.0.1",
+    "webcomponentsjs": "^1.0.0"
+  }
+}

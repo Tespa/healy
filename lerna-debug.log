@@ -1,0 +1,63 @@
+0 silly input [ 'test' ]
+1 silly flags { _: [ 'run' ], script: 'test', args: [] }
+2 verbose rootPath C:\Users\vanca\Documents\Programming\nodecg\_Utilities\healy
+3 info version 2.0.0
+4 silly existsSync C:\Users\vanca\Documents\Programming\nodecg\_Utilities\healy\VERSION
+5 silly initialize attempt
+6 silly initialize success
+7 silly execute attempt
+8 silly runScriptInDir test [] healy-utility
+9 silly getExecOpts { cwd: 'C:\\Users\\vanca\\Documents\\Programming\\nodecg\\_Utilities\\healy\\packages\\healy-utility' }
+10 silly runScriptInDir test [] healy-widget
+11 silly getExecOpts { cwd: 'C:\\Users\\vanca\\Documents\\Programming\\nodecg\\_Utilities\\healy\\packages\\healy-widget' }
+12 error test Errored while running script in 'healy-utility'
+13 error execute Error: Command failed: npm run test
+13 error execute npm ERR! code ELIFECYCLE
+13 error execute npm ERR! errno 1
+13 error execute npm ERR! healy-utility@1.0.0 test: `echo "Error: no test specified" && exit 1`
+13 error execute npm ERR! Exit status 1
+13 error execute npm ERR!
+13 error execute npm ERR! Failed at the healy-utility@1.0.0 test script.
+13 error execute npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+13 error execute
+13 error execute npm ERR! A complete log of this run can be found in:
+13 error execute npm ERR!     C:\Users\vanca\AppData\Roaming\npm-cache\_logs\2017-07-16T00_56_33_341Z-debug.log
+13 error execute
+13 error execute > healy-utility@1.0.0 test C:\Users\vanca\Documents\Programming\nodecg\_Utilities\healy\packages\healy-utility
+13 error execute > echo "Error: no test specified" && exit 1
+13 error execute
+13 error execute "Error: no test specified"
+13 error execute
+13 error execute     at Promise.all.then.arr (C:\Users\vanca\Documents\Programming\nodecg\_Utilities\healy\node_modules\execa\index.js:210:11)
+13 error execute     at <anonymous>
+13 error execute     at process._tickCallback (internal/process/next_tick.js:169:7)
+13 error execute  callback with error
+13 error execute  { Error: Command failed: npm run test
+13 error execute npm ERR! code ELIFECYCLE
+13 error execute npm ERR! errno 1
+13 error execute npm ERR! healy-utility@1.0.0 test: `echo "Error: no test specified" && exit 1`
+13 error execute npm ERR! Exit status 1
+13 error execute npm ERR!
+13 error execute npm ERR! Failed at the healy-utility@1.0.0 test script.
+13 error execute npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+13 error execute
+13 error execute npm ERR! A complete log of this run can be found in:
+13 error execute npm ERR!     C:\Users\vanca\AppData\Roaming\npm-cache\_logs\2017-07-16T00_56_33_341Z-debug.log
+13 error execute
+13 error execute > healy-utility@1.0.0 test C:\Users\vanca\Documents\Programming\nodecg\_Utilities\healy\packages\healy-utility
+13 error execute > echo "Error: no test specified" && exit 1
+13 error execute
+13 error execute "Error: no test specified"
+13 error execute
+13 error execute     at Promise.all.then.arr (C:\Users\vanca\Documents\Programming\nodecg\_Utilities\healy\node_modules\execa\index.js:210:11)
+13 error execute     at <anonymous>
+13 error execute     at process._tickCallback (internal/process/next_tick.js:169:7)
+13 error execute   stack: 'Error: Command failed: npm run test\nnpm ERR! code ELIFECYCLE\nnpm ERR! errno 1\nnpm ERR! healy-utility@1.0.0 test: `echo "Error: no test specified" && exit 1`\nnpm ERR! Exit status 1\nnpm ERR! \nnpm ERR! Failed at the healy-utility@1.0.0 test script.\nnpm ERR! This is probably not a problem with npm. There is likely additional logging output above.\n\nnpm ERR! A complete log of this run can be found in:\nnpm ERR!     C:\\Users\\vanca\\AppData\\Roaming\\npm-cache\\_logs\\2017-07-16T00_56_33_341Z-debug.log\n\n> healy-utility@1.0.0 test C:\\Users\\vanca\\Documents\\Programming\\nodecg\\_Utilities\\healy\\packages\\healy-utility\n> echo "Error: no test specified" && exit 1\n\n"Error: no test specified" \r\n\n    at Promise.all.then.arr (C:\\Users\\vanca\\Documents\\Programming\\nodecg\\_Utilities\\healy\\node_modules\\execa\\index.js:210:11)\n    at <anonymous>\n    at process._tickCallback (internal/process/next_tick.js:169:7)',
+13 error execute   code: 1,
+13 error execute   killed: false,
+13 error execute   stdout: '\n> healy-utility@1.0.0 test C:\\Users\\vanca\\Documents\\Programming\\nodecg\\_Utilities\\healy\\packages\\healy-utility\n> echo "Error: no test specified" && exit 1\n\n"Error: no test specified" \r\n',
+13 error execute   stderr: 'npm ERR! code ELIFECYCLE\nnpm ERR! errno 1\nnpm ERR! healy-utility@1.0.0 test: `echo "Error: no test specified" && exit 1`\nnpm ERR! Exit status 1\nnpm ERR! \nnpm ERR! Failed at the healy-utility@1.0.0 test script.\nnpm ERR! This is probably not a problem with npm. There is likely additional logging output above.\n\nnpm ERR! A complete log of this run can be found in:\nnpm ERR!     C:\\Users\\vanca\\AppData\\Roaming\\npm-cache\\_logs\\2017-07-16T00_56_33_341Z-debug.log\n',
+13 error execute   failed: true,
+13 error execute   signal: null,
+13 error execute   cmd: 'npm run test',
+13 error execute   timedOut: false }
