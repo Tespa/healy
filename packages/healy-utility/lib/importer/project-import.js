@@ -1,17 +1,20 @@
 'use strict';
 
 const PLAYER_IN_ROSTER_REGEX = /^[\d]+\.roster\.[\d]+/;
-const COLUMN_NAME_REGEX = /\.\w+$/;
+const COLUMN_NAME_REGEX = /\w+$/;
 
 // Packages
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
+const objectPath = require('object-path');
 
 // Ours
 const googleImporter = require('./import-from-gdrive');
 const importerOptions = require('../util/options').get();
+const nodecg = require('../util/nodecg-api-context').get();
 const replicants = require('../util/replicants');
 const zipImporter = require('./import-from-zip');
 
+const log = new nodecg.Logger('healy');
 const emitter = new EventEmitter2({wildcard: true});
 module.exports = emitter;
 
@@ -19,10 +22,6 @@ googleImporter.on('projectImported', handleProjectImport);
 zipImporter.on('projectImported', handleProjectImport);
 googleImporter.on('importFailed', handleImportFailed);
 zipImporter.on('importFailed', handleImportFailed);
-
-replicants.errors.on('change', newVal => {
-	console.log(newVal);
-});
 
 function handleProjectImport(project) {
 	replicants.metadata.value = project.metadata;
@@ -50,21 +49,23 @@ function handleProjectImport(project) {
 			replicant.validationErrors.forEach(error => {
 				const field = error.field.replace(/^data\./, '');
 				const columnName = field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
+				const parentObject = objectPath.get(project[datasetName], field.split('.').slice(0, -1));
 				const errorReport = {
 					sheetName: datasetName,
 					columnName,
-					id: error.value.id
+					id: parentObject.id || 'Unknown',
+					message: error.message
 				};
 
 				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
-					errorReport.datasetName = 'players';
-					errorReport.id = error.value.user_id;
+					errorReport.sheetName = 'players';
+					errorReport.id = parentObject.user_id;
 				}
 
 				if (error.message === 'is the wrong type') {
 					errorReport.message = `Value "${error.value}" is a "${typeof error.value}", expected a "${error.type}"`;
-				} else {
-					validationErrors.push(error.message);
+				} else if (error.message === 'has additional properties') {
+					errorReport.message = `Has these additional properties: ${error.value.replace(/^data\./g, '')}`;
 				}
 
 				validationErrors.push(errorReport);
@@ -76,6 +77,7 @@ function handleProjectImport(project) {
 
 	if (validationErrors.length > 0) {
 		emitter.emit('importFailed', validationErrors);
+		log.error('Import failed with %d errors.', validationErrors.length);
 	} else {
 		// Loop again, and do the actual assignments this time.
 		for (const sheetName in importerOptions.replicantMappings) {

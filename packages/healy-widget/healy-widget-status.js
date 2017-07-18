@@ -73,7 +73,11 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 		return !metadata || !metadata.source || metadata.source === 'none';
 	}
 
-	_calcSourceIconSrc(source) {
+	_calcSourceIconSrc(source, importerErrors) {
+		if (importerErrors && importerErrors.length > 0) {
+			return `${this.importPath}img/error.svg`;
+		}
+
 		switch (source) {
 			case 'googleDrive':
 				return `${this.importPath}img/google-icon.svg`;
@@ -95,7 +99,11 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 		}
 	}
 
-	_calcBottomText(metadata) {
+	_calcBottomText(metadata, importerErrors) {
+		if (importerErrors && importerErrors.length > 0) {
+			return `Current Status: ${importerErrors.length} Errors`;
+		}
+
 		switch (metadata.source) {
 			case 'googleDrive':
 			case 'zip':
@@ -105,7 +113,11 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 		}
 	}
 
-	_calcSelectedPage(metadata) {
+	_calcSelectedPage(metadata, importerErrors) {
+		if (importerErrors && importerErrors.length > 0) {
+			return 'errors';
+		}
+
 		return (metadata && metadata.source) ? metadata.source : 'none';
 	}
 }

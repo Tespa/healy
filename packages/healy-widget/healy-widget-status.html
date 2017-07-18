@@ -3,6 +3,7 @@
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../nodecg-replicant/nodecg-replicant.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../polymer/lib/mixins/mutable-data.html">
 
@@ -150,19 +151,21 @@
 			}
 		</style>
 
+		<nodecg-replicant replicant-name="importer:errors" value="{{importerErrors}}"></nodecg-replicant>
+
 		<div id="importStatus" hidden="[[_calcImportStatusHidden(metadata)]]">
-			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source)]]"></iron-icon>
+			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source, importerErrors)]]"></iron-icon>
 
 			<div class="layout vertical flex" style="min-width: 1px;">
 				<div id="top">
 					<html-echo html="[[_calcTopHtml(metadata)]]"></html-echo>
 				</div>
 
-				<div id="bottom">[[_calcBottomText(metadata)]]</div>
+				<div id="bottom">[[_calcBottomText(metadata, importerErrors)]]</div>
 			</div>
 		</div>
 
-		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata)]]">
+		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata, importerErrors)]]">
 			<div class="layout vertical flex" data-source="googleDrive">
 				<div id="meter">
 					<div id="meter-fill"></div>
@@ -214,6 +217,10 @@
 				<iron-icon src="[[importPath]]/img/none-icon.svg"></iron-icon>
 				<span style="font-size: 18px; font-weight: 900;">No Data Source!</span>
 				<span style="font-size: 16px; font-style: italic;">Upload ZIP or link Google Sheet</span>
+			</div>
+
+			<div id="errorsList" data-source="errors">
+				Errors will be listed here.
 			</div>
 		</iron-pages>
 	</template>

@@ -1,0 +1,18 @@
+<svg width="42" height="37" viewBox="0 0 42 37" version="1.1" xmlns="http://www.w3.org/2000/svg"
+	 xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>iron-warning</title>
+	<desc>Created using Figma</desc>
+	<g id="Canvas" transform="translate(811 -401)">
+		<g id="iron-warning">
+			<g id="warning">
+				<g id="Vector">
+					<use xlink:href="#path0_fill" transform="translate(-811 401)" fill="#C9513E"/>
+				</g>
+			</g>
+		</g>
+	</g>
+	<defs>
+		<path id="path0_fill"
+			  d="M 0 37L 42 37L 21 0L 0 37ZM 22.9091 31.1579L 19.0909 31.1579L 19.0909 27.2632L 22.9091 27.2632L 22.9091 31.1579ZM 22.9091 23.3684L 19.0909 23.3684L 19.0909 15.5789L 22.9091 15.5789L 22.9091 23.3684Z"/>
+	</defs>
+</svg>
