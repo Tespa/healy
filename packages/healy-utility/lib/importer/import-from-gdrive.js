@@ -105,11 +105,12 @@ async function updateGoogleSheet(fileId) {
 	replicants.metadata.value.updating = true;
 
 	const key = fileId || replicants.metadata.value.id;
-	const {modifiedTime} = await driveApi.files.getAsync({
+	const gdriveFileData = await driveApi.files.getAsync({
 		fileId: key,
 		fields: 'modifiedTime',
 		auth: authClient
 	});
+	const modifiedTime = Date.parse(gdriveFileData.modifiedTime);
 
 	if (replicants.metadata.value && replicants.metadata.value.modifiedTime === modifiedTime) {
 		log.debug('Workbook unchanged, not updating.');
@@ -135,7 +136,7 @@ async function updateGoogleSheet(fileId) {
 			title: spreadsheet.properties.title,
 			id: spreadsheet.spreadsheetId,
 			url: spreadsheet.spreadsheetUrl,
-			modifiedTime: Date.parse(modifiedTime),
+			modifiedTime: modifiedTime,
 			lastPollTime: Date.now(),
 			source: 'googleDrive'
 		},
