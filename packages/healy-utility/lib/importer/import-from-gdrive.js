@@ -136,7 +136,7 @@ async function updateGoogleSheet(fileId) {
 			title: spreadsheet.properties.title,
 			id: spreadsheet.spreadsheetId,
 			url: spreadsheet.spreadsheetUrl,
-			modifiedTime: modifiedTime,
+			modifiedTime,
 			lastPollTime: Date.now(),
 			source: 'googleDrive'
 		},
