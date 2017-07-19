@@ -2,6 +2,7 @@
 
 const PLAYER_IN_ROSTER_REGEX = /^[\d]+\.roster\.[\d]+/;
 const COLUMN_NAME_REGEX = /\w+$/;
+const META_COLUMN_NAME_REGEX = /\w*_meta/;
 
 // Packages
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
@@ -48,15 +49,13 @@ function handleProjectImport(project) {
 		if (!result) {
 			replicant.validationErrors.forEach(error => {
 				const field = error.field.replace(/^data\./, '');
-				const columnName = field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
+				const columnName = calcColumnName(field);
 				const parentObject = objectPath.get(project[datasetName], field.split('.').slice(0, -1));
 				const errorReport = {
 					sheetName: datasetName,
 					columnName,
 					id: parentObject.id || 'Unknown',
-					message: error.message,
-					value: error.value,
-					type: error.type
+					validatorError: error
 				};
 
 				// Errors in player objects are a special case, because the way we store players/rosters is
@@ -64,6 +63,16 @@ function handleProjectImport(project) {
 				// little extra work to map these errors back to the sheet in a way that makes sense.
 				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
 					errorReport.sheetName = 'players';
+				}
+
+				// If the error is coming from one of the "_meta" columns, which is a JSON object,
+				// we have to a little extra work to grab the correct row ID to report.
+				const metaColumnName = field.match(META_COLUMN_NAME_REGEX)[0];
+				if (metaColumnName) {
+					const pathParts = field.split('.');
+					const metaIndex = pathParts.findIndex(part => part.endsWith('_meta'));
+					errorReport.id = objectPath.get(project[datasetName], pathParts.slice(0, metaIndex)).id || 'Unknown';
+					errorReport.metaColumnName = metaColumnName;
 				}
 
 				validationErrors.push(errorReport);
@@ -88,6 +97,10 @@ function handleProjectImport(project) {
 
 		emitter.emit('projectImported', project);
 	}
+}
+
+function calcColumnName(field) {
+	return field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
 }
 
 function handleImportFailed(errors) {

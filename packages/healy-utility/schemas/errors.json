@@ -14,14 +14,26 @@
 			"id": {
 				"type": ["string", "number"]
 			},
-			"message": {
+			"metaColumnName": {
 				"type": "string"
 			},
-			"value": {},
-			"type": {
-				"type": "string"
+			"validatorError": {
+				"type": "object",
+				"additionalProperties": false,
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"value": {},
+					"type": {
+						"type": "string"
+					},
+					"field": {
+						"type": "string"
+					}
+				}
 			}
 		},
-		"required": ["sheetName", "columnName", "id", "message"]
+		"required": ["sheetName", "columnName", "id", "validatorError"]
 	}
 }

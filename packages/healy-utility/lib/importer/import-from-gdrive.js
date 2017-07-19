@@ -57,10 +57,6 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 		const message = `Invalid URL "${url}", does not contain a Google Sheets key`;
 		log.error(message);
 		return cb(message);
-	} else if (replicants.metadata.value && key === replicants.metadata.value.id) {
-		const message = 'That is already the currently imported Google Sheets workbook.';
-		log.error(message);
-		return cb(message);
 	}
 
 	driveApi.files.getAsync({

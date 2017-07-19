@@ -56,7 +56,7 @@ module.exports = function (workbook) {
 				// parse it as such.
 				if (columnNames[c].endsWith('_meta')) {
 					if (!row[c]) {
-						result[columnNames[c]] = row[c];
+						result[columnNames[c]] = null;
 						continue;
 					}
 
