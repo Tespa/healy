@@ -5,6 +5,7 @@ const COLUMN_NAME_REGEX = /\w+$/;
 const META_COLUMN_NAME_REGEX = /\w*_meta/;
 
 // Packages
+const equal = require('deep-equal');
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const objectPath = require('object-path');
 
@@ -42,6 +43,12 @@ function handleProjectImport(project) {
 		}
 
 		const replicant = importerOptions.replicantMappings[datasetName];
+
+		// Don't assign the new value if it is equal to the existing value.
+		if (equal(replicant.value, project[datasetName])) {
+			continue;
+		}
+
 		const result = replicant.validate(project[datasetName], {
 			throwOnInvalid: false
 		});

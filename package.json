@@ -14,6 +14,7 @@
     "coverage": "echo \"No coverage yet.\""
   },
   "dependencies": {
+    "deep-equal": "^1.0.1",
     "eventemitter2": "^4.1.2",
     "express": "^4.15.3"
   },
