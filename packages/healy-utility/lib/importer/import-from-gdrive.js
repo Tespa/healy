@@ -183,8 +183,7 @@ async function cacheProjectImagesFromGoogleDrive(project) {
 					fileHash: metadata.md5
 				}).then(buffer => {
 					return addToCache(buffer, {
-						namespace: job.namespace,
-						extension: metadata.extension,
+						filenName: metadata.id,
 						hash: metadata.md5,
 						processor: job.processor
 					});

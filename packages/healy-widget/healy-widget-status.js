@@ -127,6 +127,10 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 	}
 
 	_computeNumAdditionalErrors(importerErrors) {
+		if (!importerErrors) {
+			return 0;
+		}
+
 		return Math.max(importerErrors.length - 5, 0);
 	}
 

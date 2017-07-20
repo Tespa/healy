@@ -13,12 +13,6 @@
     "postinstall": "lerna bootstrap",
     "coverage": "echo \"No coverage yet.\""
   },
-  "dependencies": {
-    "deep-equal": "^1.0.1",
-    "eventemitter2": "^4.1.2",
-    "express": "^4.15.3",
-    "stopcock": "^1.0.0"
-  },
   "eslintConfig": {
     "extends": "xo/esnext",
     "plugins": [

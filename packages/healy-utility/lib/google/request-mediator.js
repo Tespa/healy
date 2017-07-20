@@ -1,49 +1,87 @@
 'use strict';
 
-const SHEETS_LIMIT = 100;
-const DRIVE_LIMIT = 1000;
-const LIMIT_MODIFIER = 0.9;
-const ONE_HUNDRED_SECONDS = 100 * 1000;
+const ONE_SECOND = 1000;
 
 // Packages
 const BB = require('bluebird');
 const google = require('googleapis');
 const stopcock = require('stopcock');
+const promiseRetry = require('promise-retry');
 
 const driveApi = google.drive('v3');
 const sheetsApi = google.sheets('v4');
 
 const DRIVE_STOPCOCK_OPTIONS = {
-	interval: ONE_HUNDRED_SECONDS,
-	limit: Math.floor(DRIVE_LIMIT * LIMIT_MODIFIER / 100)
+	interval: ONE_SECOND,
+	limit: 9
 };
 
 const SHEETS_STOPCOCK_OPTIONS = {
-	interval: 1000,
-	limit: Math.floor(SHEETS_LIMIT * LIMIT_MODIFIER / 100)
+	interval: ONE_SECOND,
+	limit: 1
 };
+
+const PROMISE_RETRY_OPTIONS = {
+	retries: 10,
+	factor: 2,
+	minTimeout: 1000,
+	maxTimeout: Infinity,
+	randomize: false
+};
+
+function isRateLimitErrorMessage(message) {
+	return message === 'User Rate Limit Exceeded' ||
+		message === 'Daily Limit Exceeded' ||
+		message === 'Rate Limit Exceeded';
+}
+
+function catcherFactory(retry) {
+	return function (err) {
+		if (isRateLimitErrorMessage(err.message)) {
+			return retry();
+		}
+
+		throw err;
+	};
+}
 
 BB.promisifyAll(driveApi.files);
 BB.promisifyAll(sheetsApi.spreadsheets);
 BB.promisifyAll(sheetsApi.spreadsheets.values);
 
-// TODO: handle ratelimit responses
 module.exports = {
 	driveApi: {
 		files: {
 			get: stopcock((...args) => {
-				return driveApi.files.getAsync(...args);
+				return promiseRetry((retry, number) => {
+					if (number > 1) {
+						console.log('driveApi.files.get try #', number);
+					}
+
+					return driveApi.files.getAsync(...args).catch(catcherFactory(retry));
+				}, PROMISE_RETRY_OPTIONS);
 			}, DRIVE_STOPCOCK_OPTIONS)
 		}
 	},
 	sheetsApi: {
 		spreadsheets: {
 			get: stopcock((...args) => {
-				return sheetsApi.spreadsheets.getAsync(...args);
+				return promiseRetry((retry, number) => {
+					if (number > 1) {
+						console.log('sheetsApi.spreadsheets.get try #', number);
+					}
+
+					return sheetsApi.spreadsheets.getAsync(...args).catch(catcherFactory(retry));
+				}, PROMISE_RETRY_OPTIONS);
 			}, SHEETS_STOPCOCK_OPTIONS),
 			values: {
 				batchGet: stopcock((...args) => {
-					return sheetsApi.spreadsheets.values.batchGetAsync(...args);
+					return promiseRetry((retry, number) => {
+						if (number > 1) {
+							console.log('sheetsApi.spreadsheets.values.batchGet try #', number);
+						}
+						return sheetsApi.spreadsheets.values.batchGetAsync(...args).catch(catcherFactory(retry));
+					}, PROMISE_RETRY_OPTIONS);
 				}, SHEETS_STOPCOCK_OPTIONS)
 			}
 		}

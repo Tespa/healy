@@ -152,7 +152,7 @@ async function cacheImageFromZip(entry, readStream) {
 
 	if (processor) {
 		const {buffer, hash} = await streamToBuffer(readStream);
-		return processor({buffer, hash, fileName: entry.fileName});
+		return addToCache(buffer, {fileName: entry.fileName, hash, processor});
 	}
 
 	return new Promise((resolve, reject) => {
