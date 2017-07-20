@@ -16,7 +16,6 @@ module.exports = function () {
 	return new Promise((resolve, reject) => {
 		const importerOptions = require('../util/options').get();
 		process.env.GOOGLE_APPLICATION_CREDENTIALS = importerOptions.googleApplicationCredentialsPath;
-		console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 		authFactory.getApplicationDefault(async (err, authClient) => {
 			if (err) {
 				return reject(err);

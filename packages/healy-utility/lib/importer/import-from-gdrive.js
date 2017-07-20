@@ -178,7 +178,6 @@ async function cacheProjectImagesFromGoogleDrive(project) {
 					return;
 				}
 
-				console.log('adding cache promise');
 				return downloadGoogleDriveFile({
 					fileId: metadata.id,
 					fileHash: metadata.md5
