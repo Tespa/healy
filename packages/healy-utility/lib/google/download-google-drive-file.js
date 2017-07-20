@@ -2,15 +2,11 @@
 
 const MAX_RETRIES = 5;
 
-// Packages
-const google = require('googleapis');
-
 // Ours
 const authClient = require('./google-auth-client').get();
 const nodecg = require('../util/nodecg-api-context').get();
 const computeHash = require('../util/compute-hash');
-
-const driveApi = google.drive('v3');
+const {driveApi} = require('./request-mediator');
 
 /**
  * Download a file from Google Drive, with checksum validation and automatic retries.

@@ -3,7 +3,6 @@
 // Packages
 const BB = require('bluebird');
 const EventEmitter = require('events');
-const google = require('googleapis');
 const NanoTimer = require('nanotimer');
 const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
 
@@ -17,16 +16,11 @@ const isCached = require('../cache/is-cached');
 const nodecg = require('../util/nodecg-api-context').get();
 const replicants = require('../util/replicants');
 const zipImporter = require('./import-from-zip');
+const {driveApi, sheetsApi} = require('../google/request-mediator');
 
 const emitter = new EventEmitter();
 const log = new nodecg.Logger('healy:gdrive');
 const googlePollTimer = new NanoTimer();
-const driveApi = google.drive('v3');
-const sheetsApi = google.sheets('v4');
-
-BB.promisifyAll(driveApi.files);
-BB.promisifyAll(sheetsApi.spreadsheets);
-BB.promisifyAll(sheetsApi.spreadsheets.values);
 
 module.exports = emitter;
 
@@ -47,7 +41,7 @@ nodecg.listenFor('importer:immediatelyPollGoogleSheet', () => {
 	}
 
 	log.info('Manual update of Google Sheet requested.');
-	doUpdateGoogleSheet();
+	doUpdateGoogleSheet({force: true});
 });
 
 nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
@@ -59,7 +53,7 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 		return cb(message);
 	}
 
-	driveApi.files.getAsync({
+	driveApi.files.get({
 		fileId: key,
 		fields: 'modifiedTime',
 		auth: authClient
@@ -80,7 +74,7 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 	});
 });
 
-async function updateGoogleSheet(fileId) {
+async function updateGoogleSheet(fileId, {force = false} = {}) {
 	googlePollTimer.clearInterval();
 
 	// If an explicit fileId was not provided, use the previous one from the metadata replicant.
@@ -105,27 +99,27 @@ async function updateGoogleSheet(fileId) {
 	replicants.metadata.value.updating = true;
 
 	const key = fileId || replicants.metadata.value.id;
-	const gdriveFileData = await driveApi.files.getAsync({
+	const gdriveFileData = await driveApi.files.get({
 		fileId: key,
 		fields: 'modifiedTime',
 		auth: authClient
 	});
 	const modifiedTime = Date.parse(gdriveFileData.modifiedTime);
 
-	if (replicants.metadata.value && replicants.metadata.value.modifiedTime === modifiedTime) {
+	if (!force && replicants.metadata.value && replicants.metadata.value.modifiedTime === modifiedTime) {
 		log.debug('Workbook unchanged, not updating.');
 		replicants.metadata.value.updating = false;
 		return;
 	}
 
-	const spreadsheet = await sheetsApi.spreadsheets.getAsync({
+	const spreadsheet = await sheetsApi.spreadsheets.get({
 		spreadsheetId: key,
 		includeGridData: false,
 		auth: authClient
 	});
 
 	const sheetNames = spreadsheet.sheets.map(sheet => sheet.properties.title);
-	const response = await sheetsApi.spreadsheets.values.batchGetAsync({
+	const response = await sheetsApi.spreadsheets.values.batchGet({
 		spreadsheetId: key,
 		ranges: sheetNames,
 		auth: authClient
@@ -162,8 +156,8 @@ async function updateGoogleSheet(fileId) {
 	googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
 }
 
-function doUpdateGoogleSheet() {
-	updateGoogleSheet().catch(err => {
+function doUpdateGoogleSheet(opts) {
+	updateGoogleSheet(null, opts).catch(err => {
 		replicants.metadata.value.updating = false;
 		log.error('Error updating spreadsheet:\n', (err && err.stack) ? err.stack : err);
 	});
@@ -175,19 +169,26 @@ async function cacheProjectImagesFromGoogleDrive(project) {
 		const dataSet = project[job.sheetName];
 		dataSet.forEach(entry => {
 			const metadata = entry[job.metadataField];
-			if (!metadata || isCached(metadata.md5)) {
+			if (!metadata) {
 				return;
 			}
 
-			const cachePromise = downloadGoogleDriveFile({
-				fileId: metadata.id,
-				fileHash: metadata.md5
-			}).then(buffer => {
-				return addToCache(buffer, {
-					namespace: job.namespace,
-					extension: metadata.extension,
-					hash: metadata.md5,
-					processor: job.processor
+			const cachePromise = isCached(metadata.md5).then(cached => {
+				if (cached) {
+					return;
+				}
+
+				console.log('adding cache promise');
+				return downloadGoogleDriveFile({
+					fileId: metadata.id,
+					fileHash: metadata.md5
+				}).then(buffer => {
+					return addToCache(buffer, {
+						namespace: job.namespace,
+						extension: metadata.extension,
+						hash: metadata.md5,
+						processor: job.processor
+					});
 				});
 			});
 

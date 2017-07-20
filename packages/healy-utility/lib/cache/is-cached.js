@@ -15,6 +15,6 @@ module.exports = function (hash, variant) {
 
 	const integrity = 'md5-' + Buffer.from(hash, 'hex').toString('base64');
 	return cacache.get.hasContent(cachePath, integrity).then(result => {
-		return Boolean(result.sri);
+		return Boolean(result && result.sri);
 	});
 };
