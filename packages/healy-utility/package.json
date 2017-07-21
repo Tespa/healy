@@ -6,7 +6,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "ava"
+    "test": "nyc ava"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
@@ -30,8 +30,8 @@
   },
   "devDependencies": {
     "ava": "^0.21.0",
-    "mock-nodecg": "^1.0.1",
-    "nyc": "^11.0.3"
+    "nyc": "^11.0.3",
+    "tmp": "0.0.31"
   },
   "files": [
     "*.js",
