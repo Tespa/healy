@@ -18,7 +18,6 @@ addons:
       - google-chrome-stable
 before_install:
   - npm install -g bower
-  - npm install -g polymer-cli
   - npm install -g lerna@^2
   - lerna bootstrap
 script:
