@@ -11,9 +11,9 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 			timeSinceLastModified: String,
 			timeSinceLastPoll: String,
 			importerErrors: Array,
-			numAdditionalErrors: {
-				type: Number,
-				computed: '_computeNumAdditionalErrors(importerErrors)'
+			importHasErrors: {
+				type: Boolean,
+				computed: '_computeImportHasErrors(importerErrors)'
 			}
 		};
 	}
@@ -126,16 +126,25 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 		return (metadata && metadata.source) ? metadata.source : 'none';
 	}
 
+	_computeImportHasErrors(importerErrors) {
+		let numErrors = 0;
+		for (const categoryName in importerErrors.value) {
+			if (!{}.hasOwnProperty.call(importerErrors.value, categoryName)) {
+				continue;
+			}
+
+			numErrors += importerErrors.value[categoryName].length;
+		}
+
+		return numErrors > 0;
+	}
+
 	_computeNumAdditionalErrors(importerErrors) {
 		if (!importerErrors) {
 			return 0;
 		}
 
 		return Math.max(importerErrors.length - 5, 0);
-	}
-
-	_calcAdditionalErrorsHidden(numAdditionalErrors) {
-		return numAdditionalErrors <= 0;
 	}
 
 	/**

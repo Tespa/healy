@@ -162,7 +162,7 @@
 		<nodecg-replicant replicant-name="importer:errors" value="{{importerErrors}}"></nodecg-replicant>
 
 		<div id="importStatus" hidden="[[_calcImportStatusHidden(metadata)]]">
-			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source, importerErrors)]]"></iron-icon>
+			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source, importHasErrors)]]"></iron-icon>
 
 			<div class="layout vertical flex" style="min-width: 1px;">
 				<div id="top">
@@ -173,7 +173,7 @@
 			</div>
 		</div>
 
-		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata, importerErrors)]]">
+		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata, importHasErrors)]]">
 			<div class="layout vertical flex" data-source="googleDrive">
 				<div id="meter">
 					<div id="meter-fill"></div>
@@ -228,7 +228,7 @@
 			</div>
 
 			<div id="errorsList" data-source="errors">
-				<template is="dom-repeat" items="[[_slice(importerErrors, 0, 5)]]" as="error" mutable-data>
+				<template is="dom-repeat" items="[[_slice(importerErrors.validationErrors, 0, 5)]]" as="error" mutable-data>
 					<healy-widget-error error="[[error]]"></healy-widget-error>
 				</template>
 

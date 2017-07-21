@@ -1,39 +1,65 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "array",
-	"items": {
-		"type": "object",
-		"additionalProperties": false,
-		"properties": {
-			"sheetName": {
-				"type": "string"
-			},
-			"columnName": {
-				"type": "string"
-			},
-			"id": {
-				"type": ["string", "number"]
-			},
-			"metaColumnName": {
-				"type": "string"
-			},
-			"validatorError": {
-				"type": "object",
-				"additionalProperties": false,
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"value": {},
-					"type": {
-						"type": "string"
-					},
-					"field": {
-						"type": "string"
+
+	"definitions": {
+		"validationError": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"sheetName": {
+					"type": "string"
+				},
+				"columnName": {
+					"type": "string"
+				},
+				"id": {
+					"type": ["string", "number"]
+				},
+				"metaColumnName": {
+					"type": "string"
+				},
+				"validatorError": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"message": {
+							"type": "string"
+						},
+						"value": {},
+						"type": {
+							"type": "string"
+						},
+						"field": {
+							"type": "string"
+						}
 					}
 				}
+			},
+			"required": ["sheetName", "columnName", "id", "validatorError"]
+		},
+		"imageError": {
+			"type": ["object", "string"]
+		}
+	},
+
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"validationErrors": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/validationError"
 			}
 		},
-		"required": ["sheetName", "columnName", "id", "validatorError"]
+		"imageErrors": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/imageError"
+			}
+		}
+	},
+	"default": {
+		"validationErrors": [],
+		"imageErrors": []
 	}
 }

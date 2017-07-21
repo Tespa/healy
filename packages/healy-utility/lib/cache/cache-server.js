@@ -9,6 +9,8 @@ const isCached = require('./is-cached');
 const nodecg = require('../util/nodecg-api-context').get();
 const cachePath = require('./cache-path');
 
+const log = new nodecg.Logger('healy:cache-server');
+
 app.get(`/${nodecg.bundleName}/cache/:hash`, async (req, res) => {
 	try {
 		const hash = req.params.hash;
@@ -32,7 +34,11 @@ app.get(`/${nodecg.bundleName}/cache/:hash`, async (req, res) => {
 				errorHandler(err, res);
 			});
 	} catch (err) {
-		nodecg.log.error('Failed to serve file from cache:\n', err.stack ? err.stack : err);
+		if (err.code === 'ENOENT') {
+			return res.sendStatus(404);
+		}
+
+		log.error('Failed to serve file from cache:\n', err.stack ? err.stack : err);
 		return res.sendStatus(500);
 	}
 });
@@ -51,7 +57,7 @@ app.get(`/${nodecg.bundleName}/checkCache`, async (req, res) => {
 	Promise.all(promises).then(results => {
 		res.send(results);
 	}).catch(err => {
-		nodecg.log.error('Failed to check cache for hashes "%s":\n', hashes, err.stack ? err.stack : err);
+		log.error('Failed to check cache for hashes "%s":\n', hashes, err.stack ? err.stack : err);
 		res.sendStatus(500);
 	});
 });
@@ -61,7 +67,7 @@ function errorHandler(error, res) {
 		return res.sendStatus(404);
 	}
 
-	nodecg.log.error('Failed to serve file from cache:\n', error.stack ? error.stack : error);
+	log.error('Failed to serve file from cache:\n', error.stack ? error.stack : error);
 	res.sendStatus(500);
 }
 

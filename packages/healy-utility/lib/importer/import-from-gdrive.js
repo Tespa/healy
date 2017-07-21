@@ -2,9 +2,7 @@
 
 // Packages
 const BB = require('bluebird');
-const EventEmitter = require('events');
-const NanoTimer = require('nanotimer');
-const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
+const serializeError = require('serialize-error');
 
 // Ours
 const addToCache = require('../cache/add-to-cache');
@@ -15,68 +13,13 @@ const importerOptions = require('../util/options').get();
 const isCached = require('../cache/is-cached');
 const nodecg = require('../util/nodecg-api-context').get();
 const replicants = require('../util/replicants');
-const zipImporter = require('./import-from-zip');
 const {driveApi, sheetsApi} = require('../google/request-mediator');
 
-const emitter = new EventEmitter();
 const log = new nodecg.Logger('healy:gdrive');
-const googlePollTimer = new NanoTimer();
 
-module.exports = emitter;
+module.exports = ingestGoogleSheet;
 
-if (replicants.metadata.value.id && replicants.metadata.value.source === 'googleDrive') {
-	log.info('Restoring previous Google Drive project "%s"', replicants.metadata.value.title);
-	doUpdateGoogleSheet();
-}
-
-// Stop polling Google Drive for new data when a zip import begins.
-zipImporter.on('importStarted', () => {
-	googlePollTimer.clearInterval();
-});
-
-nodecg.listenFor('importer:immediatelyPollGoogleSheet', () => {
-	if (replicants.metadata.value.updating) {
-		log.warn('Manual update requested, but an update was already in-progress. Ignoring.');
-		return;
-	}
-
-	log.info('Manual update of Google Sheet requested.');
-	doUpdateGoogleSheet({force: true});
-});
-
-nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
-	const key = parseGoogleSheetsKey(url).key;
-
-	if (!key) {
-		const message = `Invalid URL "${url}", does not contain a Google Sheets key`;
-		log.error(message);
-		return cb(message);
-	}
-
-	driveApi.files.get({
-		fileId: key,
-		fields: 'modifiedTime',
-		auth: authClient
-	}).then(() => {
-		return updateGoogleSheet(key);
-	}).then(() => {
-		cb(null, {title: replicants.metadata.value.title});
-	}).catch(err => {
-		let message = err.message;
-		if (err.code === 404) {
-			message = `Spreadsheet not found at url "${url}"`;
-			log.error(message);
-		} else {
-			log.error('Error loading spreadsheet:\n', (err && err.stack) ? err.stack : err);
-		}
-
-		cb(message);
-	});
-});
-
-async function updateGoogleSheet(fileId, {force = false} = {}) {
-	googlePollTimer.clearInterval();
-
+async function ingestGoogleSheet(fileId, {force = false} = {}) {
 	// If an explicit fileId was not provided, use the previous one from the metadata replicant.
 	if (!fileId) {
 		if (!replicants.metadata.value) {
@@ -144,26 +87,12 @@ async function updateGoogleSheet(fileId, {force = false} = {}) {
 		})
 	});
 
-	const imageCacheErrors = await cacheProjectImagesFromGoogleDrive(project);
-
-	if (imageCacheErrors.length > 0) {
-		// TODO: report errors
-	} else {
-		emitter.emit('projectImported', project);
-	}
-
-	// Use an interval instead of a timeout so that it keeps trying if there is an error.
-	googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+	const imageErrors = await cacheProjectImagesFromGoogleDrive(project);
+	replicants.errors.value.imageErrors = imageErrors.map(serializeError);
+	return project;
 }
 
-function doUpdateGoogleSheet(opts) {
-	updateGoogleSheet(null, opts).catch(err => {
-		replicants.metadata.value.updating = false;
-		log.error('Error updating spreadsheet:\n', (err && err.stack) ? err.stack : err);
-	});
-}
-
-async function cacheProjectImagesFromGoogleDrive(project) {
+function cacheProjectImagesFromGoogleDrive(project) {
 	const promises = [];
 	importerOptions.gdriveImageProcessingJobs.forEach(job => {
 		const dataSet = project[job.sheetName];
@@ -183,7 +112,7 @@ async function cacheProjectImagesFromGoogleDrive(project) {
 					fileHash: metadata.md5
 				}).then(buffer => {
 					return addToCache(buffer, {
-						filenName: metadata.id,
+						fileName: metadata.id,
 						hash: metadata.md5,
 						processor: job.processor
 					});
@@ -199,11 +128,8 @@ async function cacheProjectImagesFromGoogleDrive(project) {
 	})).then(inspections => {
 		const errors = [];
 		inspections.forEach(inspection => {
-			if (inspection.isFulfilled()) {
-				console.log('A promise in the array was fulfilled with', inspection.value());
-			} else {
+			if (!inspection.isFulfilled()) {
 				errors.push(inspection.reason());
-				console.error('A promise in the array was rejected with', inspection.reason());
 			}
 		});
 
