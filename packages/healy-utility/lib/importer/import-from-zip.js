@@ -82,7 +82,10 @@ async function ingestZip({zipPath, lastModified, originalName}) {
 					cacheImageFromZip(entry, readStream).then(() => {
 						zipfile.readEntry();
 					}).catch(error => {
-						imageErrors.push(error);
+						imageErrors.push({
+							fileName: entry.fileName,
+							error: serializeError(error)
+						});
 						zipfile.readEntry();
 					});
 				}
@@ -96,7 +99,7 @@ async function ingestZip({zipPath, lastModified, originalName}) {
 		// Handle the end of the zip.
 		zipfile.once('end', () => {
 			zipfile.close();
-			replicants.errors.value.imageErrors = imageErrors.map(serializeError);
+			replicants.errors.value.imageErrors = imageErrors;
 			resolve(project);
 		});
 	});

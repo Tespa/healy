@@ -1,0 +1,66 @@
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+<link rel="import" href="healy-icons.html">
+<link rel="import" href="healy-widget-error.html">
+
+<dom-module id="healy-widget-errors">
+	<template>
+		<style>
+			:host {
+				display: block;
+			}
+
+			:host(:not(:first-of-type)) {
+				margin-top: 12px;
+			}
+
+			#label {
+				text-transform: uppercase;
+				font-size: 18px;
+				font-weight: 500;
+				user-select: none;
+				@apply --layout-horizontal;
+			}
+
+			:host([has-errors]) #label {
+				cursor: pointer;
+			}
+
+			#label:hover iron-icon {
+				border-radius: 100%;
+				background-color: white;
+			}
+
+			#divider {
+				width: 100%;
+				height: 1px;
+				background: black;
+				margin-bottom: 3px;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+		</style>
+
+		<div id="label" on-click="toggleCollapse">
+			[[categoryLabel]] ([[errors.length]])
+
+			<div style="margin-left: auto" hidden="[[!hasErrors]]">
+				<iron-icon icon="healy-icons:arrow-drop-down" hidden="[[!collapseOpened]]"></iron-icon>
+				<iron-icon icon="healy-icons:arrow-drop-up" hidden="[[collapseOpened]]"></iron-icon>
+			</div>
+		</div>
+
+		<div id="divider"></div>
+
+		<iron-collapse id="collapse" opened="{{collapseOpened}}" hidden="[[!hasErrors]]">
+			<template is="dom-repeat" items="[[errors]]" as="error" mutable-data>
+				<healy-widget-error error="[[error]]" category="[[categoryName]]" source="[[source]]"></healy-widget-error>
+			</template>
+		</iron-collapse>
+
+		<div id="none" hidden="[[hasErrors]]">None.</div>
+	</template>
+
+	<script src="healy-widget-errors.js"></script>
+</dom-module>

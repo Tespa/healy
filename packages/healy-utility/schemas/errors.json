@@ -2,6 +2,22 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 
 	"definitions": {
+		"jsError": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"message": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"stack": {
+					"type": "string"
+				}
+			},
+			"required": ["message", "name", "stack"]
+		},
 		"validationError": {
 			"type": "object",
 			"additionalProperties": false,
@@ -38,7 +54,17 @@
 			"required": ["sheetName", "columnName", "id", "validatorError"]
 		},
 		"imageError": {
-			"type": ["object", "string"]
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"fileName": {
+					"type": "string"
+				},
+				"error": {
+					"$ref": "#/definitions/jsError"
+				}
+			},
+			"required": ["fileName", "error"]
 		}
 	},
 

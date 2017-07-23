@@ -51,6 +51,7 @@ app.post(`/${nodecg.bundleName}/import_project`,
 			return;
 		}
 
+		// TODO: This isn't sufficient for stopping a request-in-flight.
 		// Stop polling Google Drive for new data when a zip import begins.
 		googlePollTimer.clearInterval();
 

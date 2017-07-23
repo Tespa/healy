@@ -94,6 +94,8 @@ async function ingestGoogleSheet(fileId, {force = false} = {}) {
 
 function cacheProjectImagesFromGoogleDrive(project) {
 	const promises = [];
+	const metadataArray = [];
+
 	importerOptions.gdriveImageProcessingJobs.forEach(job => {
 		const dataSet = project[job.sheetName];
 		dataSet.forEach(entry => {
@@ -120,6 +122,7 @@ function cacheProjectImagesFromGoogleDrive(project) {
 			});
 
 			promises.push(cachePromise);
+			metadataArray.push(metadata);
 		});
 	});
 
@@ -127,9 +130,13 @@ function cacheProjectImagesFromGoogleDrive(project) {
 		return promise.reflect();
 	})).then(inspections => {
 		const errors = [];
-		inspections.forEach(inspection => {
+		inspections.forEach((inspection, index) => {
 			if (!inspection.isFulfilled()) {
-				errors.push(inspection.reason());
+				const metadata = metadataArray[index];
+				errors.push({
+					fileName: metadata.id,
+					error: serializeError(inspection.reason())
+				});
 			}
 		});
 

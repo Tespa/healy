@@ -14,7 +14,8 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 			importHasErrors: {
 				type: Boolean,
 				computed: '_computeImportHasErrors(importerErrors)'
-			}
+			},
+			source: String
 		};
 	}
 
@@ -128,35 +129,15 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 
 	_computeImportHasErrors(importerErrors) {
 		let numErrors = 0;
-		for (const categoryName in importerErrors.value) {
-			if (!{}.hasOwnProperty.call(importerErrors.value, categoryName)) {
+		for (const categoryName in importerErrors) {
+			if (!{}.hasOwnProperty.call(importerErrors, categoryName)) {
 				continue;
 			}
 
-			numErrors += importerErrors.value[categoryName].length;
+			numErrors += importerErrors[categoryName].length;
 		}
 
 		return numErrors > 0;
-	}
-
-	_computeNumAdditionalErrors(importerErrors) {
-		if (!importerErrors) {
-			return 0;
-		}
-
-		return Math.max(importerErrors.length - 5, 0);
-	}
-
-	/**
-	 * Used for data binding.
-	 * @param array {array}
-	 * @param start {number}
-	 * @param end {number}
-	 * @returns {array}
-	 * @private
-	 */
-	_slice(array, start, end) {
-		return array.slice(start, end);
 	}
 }
 
