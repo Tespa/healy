@@ -10,7 +10,6 @@ cache:
   - packages/healy-widget/bower_components
   - "$HOME/.npm"
 addons:
-  firefox: latest
   apt:
     sources:
       - google-chrome
