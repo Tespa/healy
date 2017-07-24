@@ -35,9 +35,13 @@ function isRateLimitErrorMessage(message) {
 		message === 'Rate Limit Exceeded';
 }
 
+function isRetryableCode(code) {
+	return code === 'ETIMEDOUT';
+}
+
 function catcherFactory(retry) {
 	return function (err) {
-		if (isRateLimitErrorMessage(err.message)) {
+		if (isRateLimitErrorMessage(err.message) || isRetryableCode(err.code)) {
 			return retry();
 		}
 
