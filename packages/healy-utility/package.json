@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "ava": "^0.21.0",
+    "form-data": "^2.2.0",
+    "make-fetch-happen": "^2.4.13",
     "mock-nodecg": "^1.1.0",
     "mockery": "^2.1.0",
     "nyc": "^11.0.3",

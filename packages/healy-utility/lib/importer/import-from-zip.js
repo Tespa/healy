@@ -110,19 +110,21 @@ async function cacheImageFromZip(entry, readStream) {
 	const dir = parsedFileName.dir;
 	const bottomFolder = dir.split('/').pop();
 
-	let processor;
-	Object.keys(importerOptions.zipImageProcessingJobs).some(jobName => {
-		if (bottomFolder === jobName) {
-			processor = importerOptions.zipImageProcessingJobs[jobName];
-			return true;
+	if (importerOptions.zipImageProcessingJobs) {
+		let processor;
+		Object.keys(importerOptions.zipImageProcessingJobs).some(jobName => {
+			if (bottomFolder === jobName) {
+				processor = importerOptions.zipImageProcessingJobs[jobName];
+				return true;
+			}
+
+			return false;
+		});
+
+		if (processor) {
+			const {buffer, hash} = await streamToBuffer(readStream);
+			return addToCache(buffer, {fileName: entry.fileName, hash, processor});
 		}
-
-		return false;
-	});
-
-	if (processor) {
-		const {buffer, hash} = await streamToBuffer(readStream);
-		return addToCache(buffer, {fileName: entry.fileName, hash, processor});
 	}
 
 	return new Promise((resolve, reject) => {

@@ -18,70 +18,35 @@ mockery.registerMock(path.resolve('lib/util/index'), {
 	}
 });
 mockery.enable({warnOnUnregistered: false});
+const nodecg = new MockNodeCG();
 
 // Ours
 const cachePath = require('../helpers/makeTempCachePath')(test);
 const healyUtility = require('../../index');
+const nominalHelpers = require('../helpers/nominal-helpers')(nodecg);
 
-const nodecg = new MockNodeCG();
 nodecg.bundleConfig = {cachePath};
 
 test.before(() => {
-	return healyUtility.init(nodecg, {
-		googleApplicationCredentialsPath: path.resolve(__dirname, '../../../../google-application-credentials.json'),
-		replicantMappings: {},
-		casts: {
-			integer: [
-				'deaths',
-				'game_loss',
-				'game_win',
-				'kills',
-				'kda',
-				'map_loss',
-				'map_win',
-				'match',
-				'match_loss',
-				'match_win',
-				'order',
-				'round',
-				'seed',
-				'team1_score',
-				'team2_score'
-			],
-			float: [
-				'time'
-			]
-		},
-		gdriveImageProcessingJobs: [{
-			namespace: 'teams.logo',
-			sheetName: 'teams',
-			metadataField: 'logo_meta'
-		}, {
-			namespace: 'teams.school_image',
-			sheetName: 'teams',
-			metadataField: 'school_image_meta'
-		}, {
-			namespace: 'teams.image',
-			sheetName: 'teams',
-			metadataField: 'image_meta'
-		}, {
-			namespace: 'sponsors.image',
-			sheetName: 'sponsors_rotation',
-			metadataField: 'image_meta'
-		}, {
-			namespace: 'players.image',
-			sheetName: 'players',
-			metadataField: 'image_meta'
-		}]
-	});
+	return healyUtility.init(nodecg, nominalHelpers.healyOptions);
 });
 
 test.cb('importing a project from Google Drive', t => {
 	nodecg.emit('importer:loadGoogleSheet', SHEET_URL, err => {
-		console.log('in the callback, err:', err);
 		if (err) {
 			t.fail(err);
 		} else {
+			const replicants = require('../../lib/util/replicants');
+			const fixture = JSON.parse(fs.readFileSync('test/fixtures/nominal-zip.json', 'utf-8'));
+			t.deepEqual(replicants.errors.value, {
+				imageErrors: [],
+				validationErrors: []
+			});
+
+			Object.entries(nominalHelpers.healyOptions.replicantMappings).forEach(([key, replicant]) => {
+				t.deepEqual(replicant.value, fixture[key]);
+			});
+
 			t.end();
 		}
 	});

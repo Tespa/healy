@@ -60,9 +60,10 @@ app.post(`/${nodecg.bundleName}/import_project`,
 			lastModified: req.body.lastModified,
 			originalName: req.file.originalname
 		}).then(project => {
-			res.status(200).send('Success');
 			handleProjectImport(project);
+			res.status(200).send('Success');
 		}).catch(error => {
+			console.error(error.stack);
 			res.status(500).send('Internal Server Error');
 			log.warn('Error importing zip %s:\n', req.file.originalname, (error && error.stack) ? error.stack : error);
 		});
@@ -220,7 +221,7 @@ function calcNumErrors() {
 			continue;
 		}
 
-		numErrors += replicants.errors.value[categoryName].length
+		numErrors += replicants.errors.value[categoryName].length;
 	}
 
 	return numErrors;
