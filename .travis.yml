@@ -22,9 +22,6 @@ before_install:
   - lerna bootstrap
 before_script:
   - echo "$GOOGLE_CREDENTIALS_BASE64" | base64 --decode > google-application-credentials.json
-  - ls -la
-  - git log -n 1
-  - git status
 script:
   # Run our tests with virtual X frame buffer, needed for the selenium browser tests
   - xvfb-run npm test
