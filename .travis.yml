@@ -24,6 +24,6 @@ before_script:
   - echo "$GOOGLE_CREDENTIALS_BASE64" | base64 --decode > google-application-credentials.json
 script:
   # Run our tests with virtual X frame buffer, needed for the selenium browser tests
-  - xvfb-run npm test
+  - xvfb-run lerna run test
 after_success: npm run coverage
 dist: trusty
