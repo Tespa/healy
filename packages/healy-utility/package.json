@@ -6,7 +6,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "nyc ava"
+    "test": "nyc ava --timeout=5m"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
