@@ -46,7 +46,8 @@ test('importing a project from a .zip archive', async t => {
 
 	const response = await fetch(`http://localhost:${PORT}/${nodecg.bundleName}/import_project`, {
 		method: 'POST',
-		body: form
+		body: form,
+		timeout: 60000
 	});
 
 	if (!response.ok) {
