@@ -27,6 +27,7 @@ module.exports.init = async function (nodecg, opts) {
 	} catch (err) {
 		// TODO: do something dramatic if this happens
 		log.error('Authentication failed because of ', err);
+		throw err;
 	}
 
 	if (authClient) {
@@ -40,6 +41,7 @@ module.exports.init = async function (nodecg, opts) {
 			});
 		} catch (err) {
 			log.error('Error initializing:\n', err);
+			throw err;
 		}
 	}
 

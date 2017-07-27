@@ -4,26 +4,133 @@ const PLAYER_IN_ROSTER_REGEX = /^[\d]+\.roster\.[\d]+/;
 const COLUMN_NAME_REGEX = /\w+$/;
 const META_COLUMN_NAME_REGEX = /\w*_meta/;
 
+// Native
+const path = require('path');
+
 // Packages
+const app = require('express')();
 const equal = require('deep-equal');
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
+const multer = require('multer');
+const NanoTimer = require('nanotimer');
 const objectPath = require('object-path');
+const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
+
+// NodeCG
+// Bit hacky, this is loading one of NodeCG's own lib files.
+const authCheck = require(path.resolve('lib/util/index')).authCheck;
 
 // Ours
-const googleImporter = require('./import-from-gdrive');
 const importerOptions = require('../util/options').get();
+const ingestGoogleSheet = require('./import-from-gdrive');
+const ingestZip = require('./import-from-zip');
 const nodecg = require('../util/nodecg-api-context').get();
 const replicants = require('../util/replicants');
-const zipImporter = require('./import-from-zip');
 
+const googlePollTimer = new NanoTimer();
 const log = new nodecg.Logger('healy');
 const emitter = new EventEmitter2({wildcard: true});
+const upload = multer({
+	storage: multer.diskStorage({}),
+	fileSize: 1000000 * 1024 // 1024 MB
+});
 module.exports = emitter;
 
-googleImporter.on('projectImported', handleProjectImport);
-zipImporter.on('projectImported', handleProjectImport);
-googleImporter.on('importFailed', handleImportFailed);
-zipImporter.on('importFailed', handleImportFailed);
+app.post(`/${nodecg.bundleName}/import_project`,
+	// First, check if the user is authorized.
+	authCheck,
+
+	// Then, receive the uploaded file.
+	upload.single('file'),
+
+	// Finally, process the file and send a response.
+	(req, res) => {
+		if (!req.file) {
+			res.status(400).send('Bad Request');
+			log.warn('Bad zip upload request; no file data was found. Ignoring.');
+			return;
+		}
+
+		// TODO: This isn't sufficient for stopping a request-in-flight.
+		// Stop polling Google Drive for new data when a zip import begins.
+		googlePollTimer.clearInterval();
+
+		ingestZip({
+			zipPath: req.file.path,
+			lastModified: req.body.lastModified,
+			originalName: req.file.originalname
+		}).then(project => {
+			handleProjectImport(project);
+			res.status(200).send('Success');
+		}).catch(error => {
+			console.error(error.stack);
+			res.status(500).send('Internal Server Error');
+			log.warn('Error importing zip %s:\n', req.file.originalname, (error && error.stack) ? error.stack : error);
+		});
+	}
+);
+
+nodecg.mount(app);
+
+if (replicants.metadata.value.id && replicants.metadata.value.source === 'googleDrive') {
+	log.info('Restoring previous Google Drive project "%s"', replicants.metadata.value.title);
+	doUpdateGoogleSheet();
+}
+
+nodecg.listenFor('importer:immediatelyPollGoogleSheet', () => {
+	if (replicants.metadata.value.updating) {
+		log.warn('Manual update requested, but an update was already in-progress. Ignoring.');
+		return;
+	}
+
+	log.info('Manual update of Google Sheet requested.');
+	doUpdateGoogleSheet({force: true});
+});
+
+nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
+	const key = parseGoogleSheetsKey(url).key;
+
+	if (!key) {
+		const message = `Invalid URL "${url}", does not contain a Google Sheets key`;
+		log.error(message);
+		return cb(message);
+	}
+
+	ingestGoogleSheet(key).then(project => {
+		handleProjectImport(project);
+		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+		cb(null, {title: replicants.metadata.value.title});
+	}).catch(err => {
+		let message = err.message;
+		if (err.code === 404) {
+			message = `Spreadsheet not found at url "${url}"`;
+			log.error(message);
+		} else {
+			log.error('Error loading spreadsheet:\n', (err && err.stack) ? err.stack : err);
+		}
+
+		cb(message);
+	});
+});
+
+function doUpdateGoogleSheet(opts) {
+	googlePollTimer.clearInterval();
+
+	// Use an interval instead of a timeout so that it keeps trying if there is an error.
+	googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+
+	ingestGoogleSheet(null, opts).then(project => {
+		// Project will only have value if an actual update was performed,
+		// which will not be the case if we determined that we didn't need to update
+		// because the sheet hadn't changed since our last poll.
+		if (project) {
+			handleProjectImport(project);
+		}
+	}).catch(err => {
+		replicants.metadata.value.updating = false;
+		log.error('Error updating spreadsheet:\n', (err && err.stack) ? err.stack : err);
+	});
+}
 
 function handleProjectImport(project) {
 	replicants.metadata.value = project.metadata;
@@ -87,11 +194,12 @@ function handleProjectImport(project) {
 		}
 	}
 
-	replicants.errors.value = validationErrors;
+	replicants.errors.value.validationErrors = validationErrors;
 
-	if (validationErrors.length > 0) {
+	const numErrors = calcNumErrors();
+	if (numErrors > 0) {
 		emitter.emit('importFailed', validationErrors);
-		log.error('Import failed with %d errors.', validationErrors.length);
+		log.error('Import failed with %d errors.', numErrors);
 	} else {
 		// Loop again, and do the actual assignments this time.
 		for (const sheetName in importerOptions.replicantMappings) {
@@ -106,12 +214,19 @@ function handleProjectImport(project) {
 	}
 }
 
-function calcColumnName(field) {
-	return field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
+function calcNumErrors() {
+	let numErrors = 0;
+	for (const categoryName in replicants.errors.value) {
+		if (!{}.hasOwnProperty.call(replicants.errors.value, categoryName)) {
+			continue;
+		}
+
+		numErrors += replicants.errors.value[categoryName].length;
+	}
+
+	return numErrors;
 }
 
-function handleImportFailed(errors) {
-	// TODO: this
-	replicants.errors.value = errors;
-	emitter.emit('importFailed', errors);
+function calcColumnName(field) {
+	return field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
 }

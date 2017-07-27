@@ -35,9 +35,13 @@ function isRateLimitErrorMessage(message) {
 		message === 'Rate Limit Exceeded';
 }
 
+function isRetryableCode(code) {
+	return code === 'ETIMEDOUT';
+}
+
 function catcherFactory(retry) {
 	return function (err) {
-		if (isRateLimitErrorMessage(err.message)) {
+		if (isRateLimitErrorMessage(err.message) || isRetryableCode(err.code)) {
 			return retry();
 		}
 
@@ -53,11 +57,7 @@ module.exports = {
 	driveApi: {
 		files: {
 			get: stopcock((...args) => {
-				return promiseRetry((retry, number) => {
-					if (number > 1) {
-						console.log('driveApi.files.get try #', number);
-					}
-
+				return promiseRetry(retry => {
 					return driveApi.files.getAsync(...args).catch(catcherFactory(retry));
 				}, PROMISE_RETRY_OPTIONS);
 			}, DRIVE_STOPCOCK_OPTIONS)
@@ -66,20 +66,13 @@ module.exports = {
 	sheetsApi: {
 		spreadsheets: {
 			get: stopcock((...args) => {
-				return promiseRetry((retry, number) => {
-					if (number > 1) {
-						console.log('sheetsApi.spreadsheets.get try #', number);
-					}
-
+				return promiseRetry(retry => {
 					return sheetsApi.spreadsheets.getAsync(...args).catch(catcherFactory(retry));
 				}, PROMISE_RETRY_OPTIONS);
 			}, SHEETS_STOPCOCK_OPTIONS),
 			values: {
 				batchGet: stopcock((...args) => {
-					return promiseRetry((retry, number) => {
-						if (number > 1) {
-							console.log('sheetsApi.spreadsheets.values.batchGet try #', number);
-						}
+					return promiseRetry(retry => {
 						return sheetsApi.spreadsheets.values.batchGetAsync(...args).catch(catcherFactory(retry));
 					}, PROMISE_RETRY_OPTIONS);
 				}, SHEETS_STOPCOCK_OPTIONS)

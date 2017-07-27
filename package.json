@@ -3,18 +3,18 @@
   "devDependencies": {
     "copyfiles": "^1.2.0",
     "coveralls": "^2.13.1",
-    "eslint": "^4.2.0",
+    "eslint": "^4.3.0",
     "eslint-config-xo": "^0.18.2",
-    "eslint-plugin-ava": "^4.2.0",
-    "eslint-plugin-html": "^3.1.0",
+    "eslint-plugin-ava": "^4.2.1",
+    "eslint-plugin-html": "^3.1.1",
     "lerna": "^2.0.0",
-    "nyc": "^11.0.3"
+    "nyc": "^10.3.2"
   },
   "scripts": {
     "move-reports": "copyfiles -f packages/*/{coverage,.nyc_output}/*.json .nyc_output",
     "report": "npm run move-reports && nyc report --reporter=html --reporter=text",
     "coverage": "npm run move-reports && nyc report --reporter=text-lcov | coveralls",
-    "pretest": "eslint packakges/**/*.js packages/**/*.html",
+    "pretest": "eslint packages/**/*.js packages/**/*.html",
     "test": "lerna run test",
     "postinstall": "lerna bootstrap"
   },
@@ -29,6 +29,7 @@
         {
           "capIsNewExceptions": [
             "Polymer",
+            "Polymer.MutableData",
             "nodecg.Replicant"
           ]
         }

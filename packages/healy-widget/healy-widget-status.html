@@ -6,13 +6,12 @@
 <link rel="import" href="../nodecg-replicant/nodecg-replicant.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../polymer/lib/mixins/mutable-data.html">
-<link rel="import" href="healy-widget-error.html">
+<link rel="import" href="healy-widget-errors.html">
 
 <dom-module id="healy-widget-status">
 	<template>
 		<style include="iron-flex iron-flex-alignment">
 			:host {
-				height: 180px;
 				font-family: Roboto, sans-serif;
 				@apply --layout-flex-none;
 				@apply --layout-vertical;
@@ -44,7 +43,7 @@
 
 			#pages {
 				margin-right: 12px;
-				@apply --layout-flex;
+				@apply --layout-flex-none;
 				@apply --layout-vertical;
 			}
 
@@ -56,6 +55,7 @@
 				margin-top: 16px;
 				margin-bottom: 10px;
 				overflow: hidden;
+				@apply --layout-flex-none;
 			}
 
 			#meter-fill,
@@ -112,6 +112,7 @@
 				height: 40px;
 				align-self: center;
 				margin-top: auto;
+				@apply --layout-flex-none;
 				--paper-button: {
 					color: white;
 					background-color: #5BA664;
@@ -152,17 +153,39 @@
 				font-weight: 500;
 				margin-top: 1em;
 				overflow: auto;
+				height: 420px;
 			}
 
 			[hidden] {
 				display: none !important;
+			}
+
+			::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+
+			::-webkit-scrollbar-track {
+				-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+				-webkit-border-radius: 10px;
+				border-radius: 10px;
+			}
+
+			::-webkit-scrollbar-thumb {
+				border-radius: 5px;
+				background: #757575;
+				-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+			}
+
+			::-webkit-scrollbar-thumb:window-inactive {
+				background: #b9b9b9;;
 			}
 		</style>
 
 		<nodecg-replicant replicant-name="importer:errors" value="{{importerErrors}}"></nodecg-replicant>
 
 		<div id="importStatus" hidden="[[_calcImportStatusHidden(metadata)]]">
-			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source, importerErrors)]]"></iron-icon>
+			<iron-icon id="sourceIcon" src="[[_calcSourceIconSrc(metadata.source, importHasErrors)]]"></iron-icon>
 
 			<div class="layout vertical flex" style="min-width: 1px;">
 				<div id="top">
@@ -173,8 +196,8 @@
 			</div>
 		</div>
 
-		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata, importerErrors)]]">
-			<div class="layout vertical flex" data-source="googleDrive">
+		<iron-pages id="pages" attr-for-selected="data-source" selected="[[_calcSelectedPage(metadata, importHasErrors)]]">
+			<div class="layout vertical" data-source="googleDrive">
 				<div id="meter">
 					<div id="meter-fill"></div>
 					<div id="meter-indeterminate" hidden="[[!metadata.updating]]"></div>
@@ -203,7 +226,7 @@
 				</paper-button>
 			</div>
 
-			<div class="layout vertical flex" data-source="zip">
+			<div class="layout vertical" data-source="zip">
 				<div style="margin-top: 12px;">
 					<b>Imported on:</b>
 					[[formatDate(metadata.lastPollTime)]]
@@ -226,17 +249,21 @@
 				<span style="font-size: 18px; font-weight: 900;">No Data Source!</span>
 				<span style="font-size: 16px; font-style: italic;">Upload ZIP or link Google Sheet</span>
 			</div>
-
-			<div id="errorsList" data-source="errors">
-				<template is="dom-repeat" items="[[_slice(importerErrors, 0, 5)]]" as="error" mutable-data>
-					<healy-widget-error error="[[error]]"></healy-widget-error>
-				</template>
-
-				<div id="additionalErrors" hidden="[[_calcAdditionalErrorsHidden(numAdditionalErrors)]]">
-					([[numAdditionalErrors]] additional errors)
-				</div>
-			</div>
 		</iron-pages>
+
+		<div id="errorsList" data-source="errors">
+			<healy-widget-errors
+				category-label="Validation Errors"
+				category-name="validationErrors"
+				source="[[metadata.source]]"
+				errors="[[importerErrors.validationErrors]]"></healy-widget-errors>
+
+			<healy-widget-errors
+				category-label="Image Errors"
+				category-name="imageErrors"
+				source="[[metadata.source]]"
+				errors="[[importerErrors.imageErrors]]"></healy-widget-errors>
+		</div>
 	</template>
 
 	<script src="healy-widget-status.js"></script>

@@ -28,8 +28,8 @@ module.exports = async function ({fileId, fileHash, hashAlgorithm = 'md5'}) {
 				encoding: null
 			});
 		} catch (err) {
-			nodecg.log.error('Failed to cache image\n', err.stack ? err.stack : err);
-			return;
+			nodecg.log.error('Failed to cache image\n', (err && err.stack) ? err.stack : err);
+			throw err;
 		}
 
 		const downloadHash = computeHash(buffer, hashAlgorithm);

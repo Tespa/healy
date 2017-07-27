@@ -1,39 +1,91 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "array",
-	"items": {
-		"type": "object",
-		"additionalProperties": false,
-		"properties": {
-			"sheetName": {
-				"type": "string"
+
+	"definitions": {
+		"jsError": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"message": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"stack": {
+					"type": "string"
+				}
 			},
-			"columnName": {
-				"type": "string"
-			},
-			"id": {
-				"type": ["string", "number"]
-			},
-			"metaColumnName": {
-				"type": "string"
-			},
-			"validatorError": {
-				"type": "object",
-				"additionalProperties": false,
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"value": {},
-					"type": {
-						"type": "string"
-					},
-					"field": {
-						"type": "string"
+			"required": ["message", "name", "stack"]
+		},
+		"validationError": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"sheetName": {
+					"type": "string"
+				},
+				"columnName": {
+					"type": "string"
+				},
+				"id": {
+					"type": ["string", "number"]
+				},
+				"metaColumnName": {
+					"type": "string"
+				},
+				"validatorError": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"message": {
+							"type": "string"
+						},
+						"value": {},
+						"type": {
+							"type": "string"
+						},
+						"field": {
+							"type": "string"
+						}
 					}
 				}
+			},
+			"required": ["sheetName", "columnName", "id", "validatorError"]
+		},
+		"imageError": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"fileName": {
+					"type": "string"
+				},
+				"error": {
+					"$ref": "#/definitions/jsError"
+				}
+			},
+			"required": ["fileName", "error"]
+		}
+	},
+
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"validationErrors": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/validationError"
 			}
 		},
-		"required": ["sheetName", "columnName", "id", "validatorError"]
+		"imageErrors": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/imageError"
+			}
+		}
+	},
+	"default": {
+		"validationErrors": [],
+		"imageErrors": []
 	}
 }
