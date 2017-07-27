@@ -32,7 +32,7 @@ const log = new nodecg.Logger('healy');
 const emitter = new EventEmitter2({wildcard: true});
 const upload = multer({
 	storage: multer.diskStorage({}),
-	fileSize: 1000000 * 128 // 128 MB
+	fileSize: 1000000 * 1024 // 1024 MB
 });
 module.exports = emitter;
 
