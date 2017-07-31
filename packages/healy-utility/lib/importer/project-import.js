@@ -96,6 +96,8 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 		return cb(message);
 	}
 
+	replicants.metadata.value.lastPollTime = Date.now();
+	replicants.metadata.value.updating = false;
 	ingestGoogleSheet(key).then(project => {
 		if (project) {
 			handleProjectImport(project);
