@@ -89,7 +89,6 @@ nodecg.listenFor('importer:immediatelyPollGoogleSheet', () => {
 
 nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 	const key = parseGoogleSheetsKey(url).key;
-
 	if (!key) {
 		const message = `Invalid URL "${url}", does not contain a Google Sheets key`;
 		log.error(message);
