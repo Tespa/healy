@@ -20,6 +20,8 @@ const log = new nodecg.Logger('healy:gdrive');
 module.exports = ingestGoogleSheet;
 
 async function ingestGoogleSheet(fileId, {force = false} = {}) {
+	replicants.metadata.value.updating = true;
+
 	// If an explicit fileId was not provided, use the previous one from the metadata replicant.
 	if (!fileId) {
 		if (!replicants.metadata.value) {
@@ -38,8 +40,6 @@ async function ingestGoogleSheet(fileId, {force = false} = {}) {
 			return;
 		}
 	}
-
-	replicants.metadata.value.updating = true;
 
 	const key = fileId || replicants.metadata.value.id;
 	const gdriveFileData = await driveApi.files.get({
@@ -74,7 +74,6 @@ async function ingestGoogleSheet(fileId, {force = false} = {}) {
 			id: spreadsheet.spreadsheetId,
 			url: spreadsheet.spreadsheetUrl,
 			modifiedTime,
-			lastPollTime: Date.now(),
 			source: 'googleDrive'
 		},
 		sheets: sheetNames.map((name, index) => {

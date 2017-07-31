@@ -4,7 +4,7 @@
 	"definitions": {
 		"jsError": {
 			"type": "object",
-			"additionalProperties": false,
+			"additionalProperties": true,
 			"properties": {
 				"message": {
 					"type": "string"

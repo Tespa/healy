@@ -97,7 +97,10 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 	}
 
 	ingestGoogleSheet(key).then(project => {
-		handleProjectImport(project);
+		if (project) {
+			handleProjectImport(project);
+		}
+
 		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
 		cb(null, {title: replicants.metadata.value.title});
 	}).catch(err => {
@@ -116,9 +119,6 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 function doUpdateGoogleSheet(opts) {
 	googlePollTimer.clearInterval();
 
-	// Use an interval instead of a timeout so that it keeps trying if there is an error.
-	googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
-
 	ingestGoogleSheet(null, opts).then(project => {
 		// Project will only have value if an actual update was performed,
 		// which will not be the case if we determined that we didn't need to update
@@ -126,14 +126,26 @@ function doUpdateGoogleSheet(opts) {
 		if (project) {
 			handleProjectImport(project);
 		}
-	}).catch(err => {
+
+		// Use an interval instead of a timeout so that it keeps trying if there is an error.
+		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+		replicants.metadata.value.lastPollTime = Date.now();
 		replicants.metadata.value.updating = false;
+	}).catch(err => {
 		log.error('Error updating spreadsheet:\n', (err && err.stack) ? err.stack : err);
+
+		// Use an interval instead of a timeout so that it keeps trying if there is an error.
+		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+		replicants.metadata.value.lastPollTime = Date.now();
+		replicants.metadata.value.updating = false;
 	});
 }
 
 function handleProjectImport(project) {
-	replicants.metadata.value = project.metadata;
+	replicants.metadata.value = Object.assign({
+		// Only update lastPollTime if the new metadata specifies one.
+		lastPollTime: replicants.metadata.value.lastPollTime
+	}, project.metadata);
 	replicants.metadata.value.updating = false;
 
 	const validationErrors = [];
@@ -145,11 +157,11 @@ function handleProjectImport(project) {
 			continue;
 		}
 
-		if (!{}.hasOwnProperty.call(project, datasetName)) {
-			// TODO: error here.
-		}
-
 		const replicant = importerOptions.replicantMappings[datasetName];
+		if (!{}.hasOwnProperty.call(project, datasetName)) {
+			log.error('Replicant %s is mapped to non-existent dataset "%s"', replicant.name, datasetName);
+			return;
+		}
 
 		// Don't assign the new value if it is equal to the existing value.
 		if (equal(replicant.value, project[datasetName])) {
@@ -181,7 +193,10 @@ function handleProjectImport(project) {
 
 				// If the error is coming from one of the "_meta" columns, which is a JSON object,
 				// we have to a little extra work to grab the correct row ID to report.
-				const metaColumnName = field.match(META_COLUMN_NAME_REGEX)[0];
+				const metaColumnMatches = field.match(META_COLUMN_NAME_REGEX);
+				const metaColumnName = (metaColumnMatches && metaColumnMatches.length) > 0 ?
+					metaColumnMatches[0] :
+					null;
 				if (metaColumnName) {
 					const pathParts = field.split('.');
 					const metaIndex = pathParts.findIndex(part => part.endsWith('_meta'));
@@ -199,7 +214,7 @@ function handleProjectImport(project) {
 	const numErrors = calcNumErrors();
 	if (numErrors > 0) {
 		emitter.emit('importFailed', validationErrors);
-		log.error('Import failed with %d errors.', numErrors);
+		log.error('Import failed with %d errors; replicants will not be updated.', numErrors);
 	} else {
 		// Loop again, and do the actual assignments this time.
 		for (const sheetName in importerOptions.replicantMappings) {

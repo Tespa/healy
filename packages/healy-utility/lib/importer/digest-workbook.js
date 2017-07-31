@@ -113,5 +113,17 @@ module.exports = function (workbook) {
 		return false;
 	});
 
+	const tickerRows = formattedData.ticker;
+	formattedData.ticker = [];
+	tickerRows.forEach(row => {
+		let group = formattedData.ticker.find(group => group.id === row.group);
+		if (!group) {
+			group = {id: row.group, items: []};
+			formattedData.ticker.push(group);
+		}
+
+		group.items.push(row);
+	});
+
 	return formattedData;
 };

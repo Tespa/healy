@@ -28,7 +28,10 @@ module.exports = async function ({fileId, fileHash, hashAlgorithm = 'md5'}) {
 				encoding: null
 			});
 		} catch (err) {
-			nodecg.log.error('Failed to cache image\n', (err && err.stack) ? err.stack : err);
+			if (err.code !== 404) {
+				nodecg.log.error('Failed to cache image\n', (err && err.stack) ? err.stack : err);
+			}
+
 			throw err;
 		}
 
