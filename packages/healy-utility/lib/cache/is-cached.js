@@ -10,6 +10,12 @@ module.exports = function (hash, variant) {
 	if (variant) {
 		return cacache.get(cachePath, `${hash}_${variant}`).then(info => {
 			return Boolean(info);
+		}).catch(err => {
+			if (err.code === 'ENOENT' || err.code === 404) {
+				return false;
+			}
+
+			throw err;
 		});
 	}
 
