@@ -17,12 +17,24 @@
 				zipUploadUrl: {
 					type: String,
 					value: `/${nodecg.bundleName}/import_project`
+				},
+				_reprocessArmed: {
+					type: Boolean,
+					value: false
+				},
+				_clearArmed: {
+					type: Boolean,
+					value: false
 				}
 			};
 		}
 
 		_onUploadRequest(event) {
 			event.detail.formData.append('lastModified', event.detail.file.lastModified);
+		}
+
+		openActionsDialog() {
+			return this.$.actionsDialog.open();
 		}
 
 		ready() {
@@ -72,6 +84,61 @@
 
 		_calcGoogleImportButtonDisabled(importing, urlInputValue) {
 			return importing || !urlInputValue;
+		}
+
+		_calcReprocessCacheButtonText(_reprocessArmed) {
+			return _reprocessArmed ? 'Click Again To Confirm' : 'Re-Process Image Cache';
+		}
+
+		_calcClearCacheButtonText(_clearArmed) {
+			return _clearArmed ? 'Click Again To Confirm' : 'Clear Image Cache';
+		}
+
+		_handleReprocessCacheTap() {
+			if (this._reprocessArmed) {
+				nodecg.sendMessage('importer:reprocessImages');
+				this.$.actionsDialog.close();
+			} else {
+				this._reprocessArmed = true;
+			}
+		}
+
+		_handleClearCacheTap() {
+			if (this._clearArmed) {
+				nodecg.sendMessage('importer:clearCache');
+				this.$.actionsDialog.close();
+			} else {
+				this._clearArmed = true;
+			}
+		}
+
+		_handleActionsDialogClosed() {
+			this._reprocessArmed = false;
+			this._clearArmed = false;
+		}
+
+		_calcCoverHidden(metadata) {
+			if (!metadata) {
+				return true;
+			}
+
+			return !metadata.clearing && !metadata.reprocessing;
+		}
+
+		_calcCoverMessage(metadata) {
+			if (!metadata) {
+				return '';
+			}
+
+			if (metadata.clearing) {
+				return 'Clearing image cache...';
+			}
+
+			if (metadata.reprocessing) {
+				return 'Reprocessing image cache...';
+			}
+
+			return '';
 		}
 	}
 

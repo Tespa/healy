@@ -95,7 +95,7 @@ function cacheProjectImagesFromGoogleDrive(project) {
 	const promises = [];
 	const metadataArray = [];
 
-	importerOptions.gdriveImageProcessingJobs.forEach(job => {
+	importerOptions.imageProcessingJobs.forEach(job => {
 		const dataSet = project[job.sheetName];
 		dataSet.forEach(entry => {
 			const metadata = entry[job.metadataField];
@@ -114,6 +114,7 @@ function cacheProjectImagesFromGoogleDrive(project) {
 				}).then(buffer => {
 					return addToCache(buffer, {
 						fileName: metadata.id,
+						folder: job.folder,
 						hash: metadata.md5,
 						processor: job.processor
 					});

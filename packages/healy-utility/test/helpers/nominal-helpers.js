@@ -32,24 +32,24 @@ module.exports = function (nodecg) {
 					'time'
 				]
 			},
-			gdriveImageProcessingJobs: [{
-				namespace: 'teams.logo',
+			imageProcessingJobs: [{
+				folder: 'teams.logo',
 				sheetName: 'teams',
 				metadataField: 'logo_meta'
 			}, {
-				namespace: 'teams.school_image',
+				folder: 'teams.school_image',
 				sheetName: 'teams',
 				metadataField: 'school_image_meta'
 			}, {
-				namespace: 'teams.image',
+				folder: 'teams.image',
 				sheetName: 'teams',
 				metadataField: 'image_meta'
 			}, {
-				namespace: 'sponsors.image',
+				folder: 'sponsors.image',
 				sheetName: 'sponsors_rotation',
 				metadataField: 'image_meta'
 			}, {
-				namespace: 'players.image',
+				folder: 'players.image',
 				sheetName: 'players',
 				metadataField: 'image_meta'
 			}]

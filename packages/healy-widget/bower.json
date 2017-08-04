@@ -31,7 +31,8 @@
     "vaadin-upload": "vaadin/vaadin-upload#v2.0.0",
     "html-echo": "Collaborne/html-echo#^1.0.1",
     "iron-pages": "PolymerElements/iron-pages#^2.0.0",
-    "iron-collapse": "PolymerElements/iron-collapse#^2.0.0"
+    "iron-collapse": "PolymerElements/iron-collapse#^2.0.0",
+    "paper-dialog": "PolymerElements/paper-dialog#^2.0.0"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",

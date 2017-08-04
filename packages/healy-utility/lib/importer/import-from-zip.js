@@ -73,12 +73,17 @@ async function ingestZip({zipPath, lastModified, originalName}) {
 							})
 						});
 
+						log.info('Digested workbook:', entry.fileName);
 						zipfile.readEntry();
 					}).catch(error => {
 						// TODO: this probably needs special handling too?
 						reject(error);
 					});
-				} else {
+				} else if (entry.fileName.endsWith('.png') ||
+					entry.fileName.endsWith('.jpg') ||
+					entry.fileName.endsWith('.jpeg') ||
+					entry.fileName.endsWith('.webp') ||
+					entry.fileName.endsWith('.gif')) {
 					cacheImageFromZip(entry, readStream).then(() => {
 						zipfile.readEntry();
 					}).catch(error => {
@@ -88,6 +93,9 @@ async function ingestZip({zipPath, lastModified, originalName}) {
 						});
 						zipfile.readEntry();
 					});
+				} else {
+					// Ignore the file and read next.
+					zipfile.readEntry();
 				}
 			});
 		});
@@ -110,20 +118,19 @@ async function cacheImageFromZip(entry, readStream) {
 	const dir = parsedFileName.dir;
 	const bottomFolder = dir.split('/').pop();
 
-	if (importerOptions.zipImageProcessingJobs) {
-		let processor;
-		Object.keys(importerOptions.zipImageProcessingJobs).some(jobName => {
-			if (bottomFolder === jobName) {
-				processor = importerOptions.zipImageProcessingJobs[jobName];
-				return true;
-			}
-
-			return false;
+	if (importerOptions.imageProcessingJobs) {
+		const {processor} = importerOptions.imageProcessingJobs.find(job => {
+			return job.folder === bottomFolder;
 		});
 
 		if (processor) {
 			const {buffer, hash} = await streamToBuffer(readStream);
-			return addToCache(buffer, {fileName: entry.fileName, hash, processor});
+			return addToCache(buffer, {
+				fileName: entry.fileName,
+				folder: bottomFolder,
+				hash,
+				processor
+			});
 		}
 	}
 

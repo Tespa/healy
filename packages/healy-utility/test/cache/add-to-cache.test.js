@@ -26,6 +26,6 @@ const addToCache = require('../../lib/cache/add-to-cache');
 test('files added to the cache are done so with md5', async t => {
 	const buffer = fs.readFileSync(path.resolve(__dirname, '../fixtures/pexels-photo-472457.jpeg'));
 	const md5hash = computeHash(buffer);
-	await addToCache(buffer, {fileName: 'foo', hash: md5hash});
+	await addToCache(buffer, {fileName: 'foo', folder: 'bar', hash: md5hash});
 	t.true(await isCached(md5hash));
 });

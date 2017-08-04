@@ -9,10 +9,10 @@ const path = require('path');
 
 // Packages
 const app = require('express')();
+const cacache = require('cacache');
 const equal = require('deep-equal');
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const multer = require('multer');
-const NanoTimer = require('nanotimer');
 const objectPath = require('object-path');
 const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
 
@@ -21,13 +21,16 @@ const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
 const authCheck = require(path.resolve('lib/util/index')).authCheck;
 
 // Ours
+const cachePath = require('../cache/cache-path');
 const importerOptions = require('../util/options').get();
 const ingestGoogleSheet = require('./import-from-gdrive');
 const ingestZip = require('./import-from-zip');
 const nodecg = require('../util/nodecg-api-context').get();
+const queue = require('../util/queue');
 const replicants = require('../util/replicants');
+const reprocessImages = require('./reprocess-images');
 
-const googlePollTimer = new NanoTimer();
+let googlePollInterval;
 const log = new nodecg.Logger('healy');
 const emitter = new EventEmitter2({wildcard: true});
 const upload = multer({
@@ -53,14 +56,20 @@ app.post(`/${nodecg.bundleName}/import_project`,
 
 		// TODO: This isn't sufficient for stopping a request-in-flight.
 		// Stop polling Google Drive for new data when a zip import begins.
-		googlePollTimer.clearInterval();
+		clearInterval(googlePollInterval);
 
-		ingestZip({
-			zipPath: req.file.path,
-			lastModified: req.body.lastModified,
-			originalName: req.file.originalname
+		queue.add(() => {
+			log.info('Starting zip ingest...');
+			clearInterval(googlePollInterval);
+			return ingestZip({
+				zipPath: req.file.path,
+				lastModified: req.body.lastModified,
+				originalName: req.file.originalname
+			});
 		}).then(project => {
+			clearInterval(googlePollInterval);
 			handleProjectImport(project);
+			log.info('Zip successfully ingested.');
 			res.status(200).send('Success');
 		}).catch(error => {
 			console.error(error.stack);
@@ -97,12 +106,12 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 
 	replicants.metadata.value.lastPollTime = Date.now();
 	replicants.metadata.value.updating = false;
-	ingestGoogleSheet(key).then(project => {
+	queue.add(() => ingestGoogleSheet(key)).then(project => {
 		if (project) {
 			handleProjectImport(project);
 		}
 
-		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+		googlePollInterval = setInterval(doUpdateGoogleSheet, 60000);
 		cb(null, {title: replicants.metadata.value.title});
 	}).catch(err => {
 		let message = err.message;
@@ -113,14 +122,47 @@ nodecg.listenFor('importer:loadGoogleSheet', (url, cb) => {
 			log.error('Error loading spreadsheet:\n', (err && err.stack) ? err.stack : err);
 		}
 
+		console.error(err);
 		cb(message);
 	});
 });
 
-function doUpdateGoogleSheet(opts) {
-	googlePollTimer.clearInterval();
+nodecg.listenFor('importer:reprocessImages', (data, cb = function () {}) => {
+	queue.add(() => {
+		log.info('Reprocessing image cache...');
+		replicants.metadata.value.reprocessing = true;
+		return reprocessImages();
+	}).then(() => {
+		log.info('Successfully reprocessed image cache.');
+		replicants.metadata.value.reprocessing = false;
+		cb();
+	}).catch(err => {
+		replicants.metadata.value.reprocessing = false;
+		log.error('Failed to reprocess images:', (err && err.stack) ? err.stack : err);
+		cb(err);
+	});
+});
 
-	ingestGoogleSheet(null, opts).then(project => {
+nodecg.listenFor('importer:clearCache', (data, cb = function () {}) => {
+	queue.add(() => {
+		log.info('Clearing image cache...');
+		replicants.metadata.value.clearing = true;
+		return cacache.rm.all(cachePath);
+	}).then(() => {
+		log.info('Successfully cleared image cache.');
+		replicants.metadata.value.clearing = false;
+		cb();
+	}).catch(err => {
+		replicants.metadata.value.clearing = false;
+		log.error('Failed to clear cache:', (err && err.stack) ? err.stack : err);
+		cb(err);
+	});
+});
+
+function doUpdateGoogleSheet(opts) {
+	clearInterval(googlePollInterval);
+
+	queue.add(() => ingestGoogleSheet(null, opts)).then(project => {
 		// Project will only have value if an actual update was performed,
 		// which will not be the case if we determined that we didn't need to update
 		// because the sheet hadn't changed since our last poll.
@@ -129,14 +171,14 @@ function doUpdateGoogleSheet(opts) {
 		}
 
 		// Use an interval instead of a timeout so that it keeps trying if there is an error.
-		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+		googlePollInterval = setInterval(doUpdateGoogleSheet, 60000);
 		replicants.metadata.value.lastPollTime = Date.now();
 		replicants.metadata.value.updating = false;
 	}).catch(err => {
 		log.error('Error updating spreadsheet:\n', (err && err.stack) ? err.stack : err);
 
 		// Use an interval instead of a timeout so that it keeps trying if there is an error.
-		googlePollTimer.setInterval(doUpdateGoogleSheet, '', '60s');
+		googlePollInterval = setInterval(doUpdateGoogleSheet, 60000);
 		replicants.metadata.value.lastPollTime = Date.now();
 		replicants.metadata.value.updating = false;
 	});

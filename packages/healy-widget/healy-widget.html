@@ -1,10 +1,13 @@
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../nodecg-replicant/nodecg-replicant.html">
 <link rel="import" href="../nodecg-toast/nodecg-toast.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
 <link rel="import" href="../paper-styles/shadow.html">
 <link rel="import" href="../polymer/lib/mixins/mutable-data.html">
 <link rel="import" href="../vaadin-upload/vaadin-upload.html">
@@ -24,9 +27,53 @@
 			#takeButton {
 				margin-right: 13px;
 				margin-left: 12px;
+				width: 156px;
+				height: 40px;
 				--paper-button: {
 					color: white;
 					background-color: #5BA664;
+				}
+			}
+
+			#actionsButton {
+				width: 102px;
+				height: 40px;
+				margin-left: 18px;
+				margin-right: 0;
+				--paper-button: {
+					color: white;
+					background-color: #645BA6;
+				};
+			}
+
+			#actionsDialog {
+				width: 390px;
+			}
+
+			#actionsDialog paper-button:not([dialog-dismiss]) {
+				width: 260px;
+				height: 50px;
+				font-size: 16px;
+			}
+
+			#actionsDialog p {
+				text-align: center;
+				max-width: 312px;
+				font-size: 16px;
+				font-weight: bold;
+			}
+
+			#reprocessCache {
+				--paper-button: {
+					color: white;
+					background-color: #5BA664;
+				}
+			}
+
+			#clearCache {
+				--paper-button: {
+					color: white;
+					background-color: #C9513E;
 				}
 			}
 
@@ -39,11 +86,6 @@
 
 			:host([importing]) #takeButton-label {
 				opacity: 0;
-			}
-
-			paper-button {
-				width: 156px;
-				height: 40px;
 			}
 
 			#upload {
@@ -61,6 +103,31 @@
 				margin-top: 9px;
 				margin-left: 12px;
 			}
+
+			#cover {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.5);
+				@apply --layout-horizontal;
+				@apply --layout-center-center;
+			}
+
+			#cover-content {
+				padding: 18px 26px;
+				background: white;
+				text-align: center;
+				font-weight: 500;
+				font-size: 16px;
+				@apply --layout-vertical;
+				@apply --layout-center-center;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
 		</style>
 
 		<nodecg-replicant replicant-name="importer:metadata" value="{{metadata}}"></nodecg-replicant>
@@ -68,10 +135,9 @@
 		<div class="layout horizontal center">
 			<paper-button
 				id="takeButton"
-				raised
 				on-tap="take"
-				disabled="[[_calcGoogleImportButtonDisabled(importing, urlInputValue)]]">
-
+				disabled="[[_calcGoogleImportButtonDisabled(importing, urlInputValue)]]"
+				raised>
 				<span id="takeButton-label">Import Sheet</span>
 				<paper-spinner-lite
 					id="spinner"
@@ -85,6 +151,11 @@
 				label="Google Sheets URL"
 				disabled="[[importing]]"
 				value="{{urlInputValue}}"></paper-input>
+
+			<paper-button
+				id="actionsButton"
+				on-tap="openActionsDialog"
+				raised>Actions</paper-button>
 		</div>
 
 		<vaadin-upload
@@ -97,6 +168,45 @@
 		</vaadin-upload>
 
 		<healy-widget-status id="status" metadata="[[metadata]]"></healy-widget-status>
+
+		<div id="cover" hidden="[[_calcCoverHidden(metadata)]]">
+			<div id="cover-content">
+				<div>[[_calcCoverMessage(metadata)]]</div>
+				<paper-spinner active style="margin-top: 1em;"></paper-spinner>
+			</div>
+		</div>
+
+		<paper-dialog id="actionsDialog" with-backdrop on-iron-overlay-closed="_handleActionsDialogClosed">
+			<div class="layout vertical center">
+				<paper-button id="reprocessCache" on-tap="_handleReprocessCacheTap" raised>
+					[[_calcReprocessCacheButtonText(_reprocessArmed)]]
+
+				</paper-button>
+				<p>
+					All cached images will be re-run through any processors
+					present in the project, such as scalers or slicers.
+					You may need to use this if some processing code has
+					changed but the source images have remained the same.
+				</p>
+
+				<br/>
+				<br/>
+				<br/>
+
+				<paper-button id="clearCache" on-tap="_handleClearCacheTap" raised>
+					[[_calcClearCacheButtonText(_clearArmed)]]
+				</paper-button>
+				<p>
+					All images will have to be re-downloaded.<br/>
+					It <i>should</i> never be necessary to use this.<br/>
+					Only use this if things seem truly broken.
+				</p>
+			</div>
+
+			<div class="buttons">
+				<paper-button dialog-dismiss>Cancel</paper-button>
+			</div>
+		</paper-dialog>
 
 		<nodecg-toast id="toast"></nodecg-toast>
 	</template>

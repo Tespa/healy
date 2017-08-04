@@ -11,6 +11,11 @@ module.exports = {
 	errors: nodecg.Replicant('importer:errors', {schemaPath: buildSchemaPath('errors')})
 };
 
+// Reset a few boolean state values on startup.
+module.exports.metadata.value.updating = false;
+module.exports.metadata.value.reprocessing = false;
+module.exports.metadata.value.clearing = false;
+
 /**
  * Calculates the absolute file path to one of our local Replicant schemas.
  * @param schemaName {string}

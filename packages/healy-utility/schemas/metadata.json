@@ -26,6 +26,14 @@
 		"updating": {
 			"type": "boolean",
 			"default": false
+		},
+		"reprocessing": {
+			"type": "boolean",
+			"default": false
+		},
+		"clearing": {
+			"type": "boolean",
+			"default": false
 		}
 	}
 }
