@@ -25,7 +25,6 @@ module.exports.init = async function (nodecg, opts) {
 		googleAuthClient.set(authClient);
 		log.info('Authenticated with Google');
 	} catch (err) {
-		// TODO: do something dramatic if this happens
 		log.error('Authentication failed because of ', err);
 		throw err;
 	}
