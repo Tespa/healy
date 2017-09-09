@@ -97,7 +97,9 @@ class HealyWidgetStatus extends Polymer.MutableData(Polymer.Element) {
 	_calcTopHtml(metadata) {
 		switch (metadata.source) {
 			case 'googleDrive':
-				return `Google Sheet: <b style="color: #5BA664;" title="${metadata.title}">${metadata.title}</b>`;
+				return `Google Sheet: <a href="${metadata.url}" target="_blank" rel="noopener">
+					<b style="color: #5BA664;" title="${metadata.title}">${metadata.title}</b>
+				</a>`;
 			case 'zip':
 				return `Uploaded ZIP: <b style="color: #5BA664;" title="${metadata.title}">${metadata.title}</b>`;
 			default:
