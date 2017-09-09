@@ -60,10 +60,15 @@ module.exports = function (workbook) {
 						continue;
 					}
 
+					if (row[c] === 'NOT_FOUND') {
+						result[columnNames[c]] = null;
+						continue;
+					}
+
 					try {
 						result[columnNames[c]] = JSON.parse(row[c]);
 					} catch (err) {
-						log.error(`Failed to parse JSON from row ${rowNum + 1}, column ${c} (${row[c]}):\n`,
+						log.error(`Failed to parse JSON from row ${rowNum + 1}, column ${c}, in sheet "${sheet.name}" (${row[c]}):\n`,
 							err.stack ? err.stack : err);
 					}
 					continue;
