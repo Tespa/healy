@@ -11,6 +11,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "cacache": "^9.2.9",
+    "clone": "^2.1.1",
     "deep-equal": "^1.0.1",
     "eventemitter2": "^4.1.2",
     "express": "^4.15.3",

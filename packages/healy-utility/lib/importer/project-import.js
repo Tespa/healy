@@ -10,6 +10,7 @@ const path = require('path');
 // Packages
 const app = require('express')();
 const cacache = require('cacache');
+const clone = require('clone');
 const equal = require('deep-equal');
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const multer = require('multer');
@@ -265,7 +266,7 @@ function handleProjectImport(project) {
 				continue;
 			}
 
-			importerOptions.replicantMappings[sheetName].value = project[sheetName];
+			importerOptions.replicantMappings[sheetName].value = clone(project[sheetName]);
 		}
 
 		emitter.emit('projectImported', project);
