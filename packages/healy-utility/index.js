@@ -47,3 +47,6 @@ module.exports.init = async function (nodecg, opts) {
 	// Yeah, this is weird, but we have to intentionally delay this until we have the nodecg API context.
 	module.exports.addToCache = require('./lib/cache/add-to-cache');
 };
+
+// This was added to trick Lerna into publishing a new version.
+// TODO: delete the above comment.
