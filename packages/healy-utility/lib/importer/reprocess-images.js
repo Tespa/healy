@@ -10,8 +10,7 @@ const ssri = require('ssri');
 const cachePath = require('../cache/cache-path');
 const importerOptions = require('../util/options').get();
 
-module.exports = function () {
-	let hasErrored = false;
+module.exports = async function () {
 	const promises = [];
 	const processorMap = new Map();
 	importerOptions.imageProcessingJobs.forEach(job => {
@@ -20,56 +19,35 @@ module.exports = function () {
 		}
 	});
 
-	return new Promise((resolve, reject) => {
-		const stream = cacache.ls.stream(cachePath);
-		stream.on('data', entry => {
-			if (hasErrored) {
-				return;
-			}
+	const cacheEntries = await cacache.ls(cachePath);
+	Object.values(cacheEntries).forEach(entry => {
+		if (!entry.metadata || !processorMap.has(entry.metadata.folder)) {
+			return;
+		}
 
-			if (!entry.metadata || !processorMap.has(entry.metadata.folder)) {
-				return;
-			}
+		const processor = processorMap.get(entry.metadata.folder);
+		const promise = cacache.get(cachePath, entry.key).then(async ({data, metadata, integrity}) => {
+			const processorResults = await processor({
+				buffer: data,
+				hash: ssri.parse(integrity).hexDigest(),
+				fileName: metadata.fileName
+			});
 
-			const processor = processorMap.get(entry.metadata.folder);
-			const promise = cacache.get(cachePath, entry.key).then(({data, metadata, integrity}) => {
-				const sri = ssri.parse(integrity);
-				return processor({
-					buffer: data,
-					hash: sri.digest,
-					fileName: metadata.fileName
+			if (Array.isArray(processorResults)) {
+				const putPromises = [];
+				processorResults.forEach(({buffer, key}) => {
+					const putPromise = cacache.put(cachePath, key, buffer, CACACHE_OPTS);
+					putPromises.push(putPromise);
 				});
-			}).then(results => {
-				if (Array.isArray(results)) {
-					const putPromises = [];
-					results.forEach(({buffer, key}) => {
-						const putPromise = cacache.put(cachePath, key, buffer, CACACHE_OPTS);
-						putPromises.push(putPromise);
-					});
-					return Promise.all(putPromises);
-				}
-
-				return cacache.put(cachePath, results.key, results.buffer, CACACHE_OPTS);
-			});
-
-			promises.push(promise);
-		});
-
-		stream.on('end', () => {
-			if (hasErrored) {
-				return;
+				return Promise.all(putPromises);
 			}
-			Promise.all(promises).then(() => {
-				return resolve();
-			});
+
+			return cacache.put(cachePath, processorResults.key, processorResults.buffer, CACACHE_OPTS);
 		});
 
-		stream.on('error', error => {
-			if (hasErrored) {
-				return;
-			}
-			hasErrored = true;
-			reject(error);
-		});
+		promises.push(promise);
 	});
+
+	await Promise.all(promises);
+	await cacache.verify(cachePath);
 };
