@@ -51,6 +51,11 @@ module.exports = function (workbook) {
 			const result = {};
 
 			for (let c = 0; c < numColumns; c++) {
+				// Ignore columns with no title.
+				if (columnNames[c] === '') {
+					continue;
+				}
+
 				// This is currently a hardcoded special case.
 				// If a column name ends with "_meta", we always assume that it is JSON and
 				// parse it as such.
