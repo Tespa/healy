@@ -22,6 +22,10 @@ module.exports = function (workbook) {
 
 		// Normalize all column names to snake_case.
 		const columnNames = sheet.values[0].map(columnName => {
+			if (columnName && columnName.startsWith('_')) {
+				return columnName;
+			}
+
 			columnName = _snakeCase(columnName);
 
 			// Lodash.snakecase inserts an underscore in the middle of the string "md5",
