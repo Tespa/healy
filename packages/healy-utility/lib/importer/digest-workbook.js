@@ -56,6 +56,11 @@ module.exports = function (workbook) {
 					continue;
 				}
 
+				// Ignore columns which start with '_', which are private columns used internally by the sheet.
+				if (columnNames[c] && columnNames[c].startsWith('_')) {
+					continue;
+				}
+
 				// This is currently a hardcoded special case.
 				// If a column name ends with "_meta", we always assume that it is JSON and
 				// parse it as such.
