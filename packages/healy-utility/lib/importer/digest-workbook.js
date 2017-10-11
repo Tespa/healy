@@ -114,14 +114,18 @@ module.exports = function (workbook) {
 	// Do two things at once:
 	// 1) Remove players whom do not have a valid team id.
 	// 2) Add players to their team's roster.
-	formattedData.players = formattedData.players.filter(player => {
-		if (teamsById[player.team_id]) {
-			teamsById[player.team_id].roster.push(player);
-			return true;
-		}
+	if (formattedData.players) {
+		formattedData.players = formattedData.players.filter(player => {
+			if (teamsById[player.team_id]) {
+				teamsById[player.team_id].roster.push(player);
+				return true;
+			}
 
-		return false;
-	});
+			return false;
+		});
+	} else {
+		formattedData.players = [];
+	}
 
 	const tickerRows = formattedData.ticker;
 	formattedData.ticker = [];
