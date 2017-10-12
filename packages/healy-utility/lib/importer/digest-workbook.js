@@ -90,12 +90,20 @@ module.exports = function (workbook) {
 
 				// Since most data in a Google Spreadsheet comes in as a string, we
 				// must cast it to the right type based on the options provided.
-				if (importerOptions.casts.integer.includes(columnNames[c])) {
+				if (importerOptions.casts.integerNoCoercion &&
+					importerOptions.casts.integerNoCoercion.includes(columnNames[c])) {
+					result[columnNames[c]] = parseInt(row[c], 10);
+				} else if (importerOptions.casts.floatNoCoercion &&
+					importerOptions.casts.floatNoCoercion.includes(columnNames[c])) {
+					result[columnNames[c]] = parseFloat(row[c]);
+				} else if (importerOptions.casts.integer &&
+					importerOptions.casts.integer.includes(columnNames[c])) {
 					result[columnNames[c]] = parseInt(row[c], 10);
 					if (isNaN(result[columnNames[c]])) {
 						result[columnNames[c]] = 0;
 					}
-				} else if (importerOptions.casts.float.includes(columnNames[c])) {
+				} else if (importerOptions.casts.float &&
+					importerOptions.casts.float.includes(columnNames[c])) {
 					result[columnNames[c]] = parseFloat(row[c]);
 					if (isNaN(result[columnNames[c]])) {
 						result[columnNames[c]] = 0;
