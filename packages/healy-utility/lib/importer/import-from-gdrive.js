@@ -97,6 +97,10 @@ function cacheProjectImagesFromGoogleDrive(project) {
 
 	importerOptions.imageProcessingJobs.forEach(job => {
 		const dataSet = project[job.sheetName];
+		if (!dataSet) {
+			return;
+		}
+
 		dataSet.forEach(entry => {
 			const metadata = entry[job.metadataField];
 			if (!metadata) {
