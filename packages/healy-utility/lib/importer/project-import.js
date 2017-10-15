@@ -233,6 +233,7 @@ function handleProjectImport(project) {
 				// little extra work to map these errors back to the sheet in a way that makes sense.
 				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
 					errorReport.sheetName = 'players';
+					errorReport.id = parentObject.user_id || 'Unknown';
 				}
 
 				// If the error is coming from one of the "_meta" columns, which is a JSON object,
