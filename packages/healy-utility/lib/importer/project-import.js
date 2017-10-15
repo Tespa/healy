@@ -236,6 +236,10 @@ function handleProjectImport(project) {
 					errorReport.id = parentObject.user_id || 'Unknown';
 				}
 
+				if (datasetName === 'players') {
+					errorReport.id = parentObject.user_id || 'Unknown';
+				}
+
 				// If the error is coming from one of the "_meta" columns, which is a JSON object,
 				// we have to a little extra work to grab the correct row ID to report.
 				const metaColumnMatches = field.match(META_COLUMN_NAME_REGEX);
