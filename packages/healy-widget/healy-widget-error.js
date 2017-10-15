@@ -40,6 +40,9 @@ class HealyWidgetError extends Polymer.MutableData(Polymer.Element) {
 				str += `Column <pre>${columnName}</pre> is required.`;
 			}
 		} else {
+			if (columnName && !metaColumnName) {
+				str += `Column <pre>${columnName}</pre> `;
+			}
 			str += validatorError.message;
 		}
 
