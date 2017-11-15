@@ -10,9 +10,9 @@ module.exports = async function (buffer, {key, fileName, hash, folder, hashAlgor
 	if (!Buffer.isBuffer(buffer)) {
 		throw new Error(`Argument "buffer" must be of type "buffer", got a(n) "${typeof buffer}"`);
 	} else if (typeof fileName !== 'string') {
-		throw new Error(`Argument "fileName" must be of type "string", got a(n) "${typeof buffer}"`);
+		throw new Error(`Argument "fileName" must be of type "string", got a(n) "${typeof fileName}"`);
 	} else if (typeof folder !== 'string') {
-		throw new Error(`Argument "folder" must be of type "string", got a(n) "${typeof buffer}"`);
+		throw new Error(`Argument "folder" must be of type "string", got a(n) "${typeof folder}"`);
 	}
 
 	if (processor) {
