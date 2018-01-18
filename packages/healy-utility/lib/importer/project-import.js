@@ -19,7 +19,11 @@ const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
 
 // NodeCG
 // Bit hacky, this is loading one of NodeCG's own lib files.
-const authCheck = require(path.resolve('lib/util/index')).authCheck;
+const authCheck = require(
+	global.isZeitPkg ?
+		path.resolve(__dirname, '../../../..', 'lib/util/index') :
+		path.resolve('lib/util/index')
+).authCheck;
 
 // Ours
 const cachePath = require('../cache/cache-path');
