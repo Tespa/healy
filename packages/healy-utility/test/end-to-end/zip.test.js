@@ -15,11 +15,6 @@ const test = require('ava');
 
 // Mocks
 const MockNodeCG = require('mock-nodecg');
-mockery.registerMock(path.resolve('lib/util/index'), {
-	authCheck(req, res, next) {
-		return next();
-	}
-});
 mockery.enable({warnOnUnregistered: false});
 const nodecg = new MockNodeCG({bundleName: 'test_bundle'});
 
