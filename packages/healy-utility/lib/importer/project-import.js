@@ -4,9 +4,6 @@ const PLAYER_IN_ROSTER_REGEX = /^[\d]+\.roster\.[\d]+/;
 const COLUMN_NAME_REGEX = /\w+$/;
 const META_COLUMN_NAME_REGEX = /\w*_meta/;
 
-// Native
-const path = require('path');
-
 // Packages
 const app = require('express')();
 const cacache = require('cacache');
@@ -16,14 +13,6 @@ const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const multer = require('multer');
 const objectPath = require('object-path');
 const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
-
-// NodeCG
-// Bit hacky, this is loading one of NodeCG's own lib files.
-const authCheck = require(
-	global.isZeitPkg ?
-		path.resolve(__dirname, '../../../../../..', 'lib/util/index') :
-		path.resolve('lib/util/index')
-).authCheck;
 
 // Ours
 const cachePath = require('../cache/cache-path');
@@ -46,7 +35,7 @@ module.exports = emitter;
 
 app.post(`/${nodecg.bundleName}/import_project`,
 	// First, check if the user is authorized.
-	authCheck,
+	nodecg.util.authCheck,
 
 	// Then, receive the uploaded file.
 	upload.single('file'),
