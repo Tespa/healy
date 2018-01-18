@@ -1,6 +1,6 @@
 {
   "name": "healy-utility",
-  "version": "1.0.0-22",
+  "version": "1.0.0-23",
   "main": "index.js",
   "directories": {
     "lib": "lib"
