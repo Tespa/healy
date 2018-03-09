@@ -23,8 +23,8 @@
   ],
   "dependencies": {
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
-    "nodecg-replicant": "NodeCGElements/nodecg-replicant#1.0.0",
-    "nodecg-toast": "NodeCGElements/nodecg-toast#1.0.0",
+    "nodecg-replicant": "NodeCGElements/nodecg-replicant#^1.0.0",
+    "nodecg-toast": "NodeCGElements/nodecg-toast#^1.0.0",
     "paper-button": "PolymerElements/paper-button#^2.0.0",
     "paper-input": "PolymerElements/paper-input#^2.0.1",
     "paper-spinner": "PolymerElements/paper-spinner#^2.0.0",
