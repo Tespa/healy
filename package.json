@@ -16,7 +16,9 @@
     "coverage": "npm run move-reports && nyc report --reporter=text-lcov | coveralls",
     "pretest": "eslint packages/**/*.js packages/**/*.html",
     "test": "lerna run test",
-    "postinstall": "lerna bootstrap"
+    "postinstall": "lerna bootstrap",
+    "prepublish": "npm t",
+    "publish": "lerna publish --conventional-commits"
   },
   "eslintConfig": {
     "extends": "xo/esnext",
