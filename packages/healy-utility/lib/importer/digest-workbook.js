@@ -124,6 +124,9 @@ module.exports = function (workbook) {
 	// For now, this gets the job done.
 	const teamsById = {};
 	formattedData.teams.forEach(team => {
+		team.entrantType = 'team';
+		team.entrantIdPath = 'id';
+		team.entrantLabelPath = 'name_short';
 		team.roster = [];
 		teamsById[team.id] = team;
 	});
@@ -133,6 +136,9 @@ module.exports = function (workbook) {
 	// 2) Add players to their team's roster.
 	if (formattedData.players) {
 		formattedData.players = formattedData.players.filter(player => {
+			player.entrantType = 'player';
+			player.entrantIdPath = 'user_id';
+			player.entrantLabelPath = 'handle';
 			if (teamsById[player.team_id]) {
 				teamsById[player.team_id].roster.push(player);
 				return true;
