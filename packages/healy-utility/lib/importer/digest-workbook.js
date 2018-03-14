@@ -129,6 +129,18 @@ module.exports = function (workbook) {
 	formattedData.teams = formattedTeams;
 	formattedData.players = formattedPlayers;
 
+	if (formattedData.group && formattedData.group_players && formattedData.group_matches) {
+		// Process groups.
+		formattedData.groups = processGroups(
+			formattedData.group,
+			formattedData.group_players,
+			formattedData.group_matches
+		);
+		delete formattedData.group;
+		delete formattedData.group_players;
+		delete formattedData.group_matches;
+	}
+
 	if (formattedData.ticker) {
 		// Process ticker data.
 		const tickerRows = formattedData.ticker;
@@ -188,4 +200,40 @@ function processTeamsAndPlayers(inputTeams, inputPlayers) {
 		formattedTeams: outputTeams,
 		formattedPlayers: outputPlayers
 	};
+}
+
+/**
+ * Translates group data from the Integration Sheet format into the Irvine Framework format.
+ * @param inputGroups {Array}
+ * @param inputGroupPlayers {Array}
+ * @param inputGroupMatches {Array}
+ * @returns {Array}
+ */
+function processGroups(inputGroups, inputGroupPlayers, inputGroupMatches) {
+	const outputGroups = inputGroups.slice(0);
+
+	const groupsById = {};
+	inputGroups.forEach(group => {
+		group.players = [];
+		group.matches = [];
+		groupsById[group.group_id] = group;
+	});
+
+	// Map player listings into their groups.
+	// Removes player listings which have an invalid group_id.
+	inputGroupPlayers.forEach(player => {
+		if (groupsById[player.group_id]) {
+			groupsById[player.group_id].players.push(player);
+		}
+	});
+
+	// Map match listings into their groups.
+	// Removes match listings which have an invalid group_id.
+	inputGroupMatches.forEach(match => {
+		if (groupsById[match.group_id]) {
+			groupsById[match.group_id].matches.push(match);
+		}
+	});
+
+	return outputGroups;
 }
