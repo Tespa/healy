@@ -15,6 +15,11 @@ module.exports = function (workbook) {
 	};
 
 	workbook.sheets.forEach(sheet => {
+		// Ignore "private" sheets (ones beginning with an underscore).
+		if (sheet.name.startsWith('_')) {
+			return;
+		}
+
 		// Ignore empty sheets.
 		if (!sheet.values[0]) {
 			formattedData[_snakeCase(sheet.name)] = [];
