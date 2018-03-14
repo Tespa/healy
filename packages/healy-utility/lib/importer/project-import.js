@@ -1,6 +1,8 @@
 'use strict';
 
 const PLAYER_IN_ROSTER_REGEX = /^[\d]+\.roster\.[\d]+/;
+const PLAYER_IN_GROUP_REGEX = /^[\d]+\.players\.[\d]+/;
+const MATCH_IN_GROUP_REGEX = /^[\d]+\.matches\.[\d]+/;
 const COLUMN_NAME_REGEX = /\w+$/;
 const META_COLUMN_NAME_REGEX = /\w*_meta/;
 
@@ -228,6 +230,18 @@ function handleProjectImport(project) {
 				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
 					// The problem is with one of the players listings in the roster.
 					errorReport.sheetName = 'players';
+				}
+
+				if (datasetName === 'groups') {
+					if (PLAYER_IN_GROUP_REGEX.test(field)) {
+						// The problem is with one of the player listings in the group.
+						errorReport.sheetName = 'group_players';
+						errorReport.id = `group-id-${culpritObject.group_id}_user-id-${culpritObject.user_id}`;
+					} else if (MATCH_IN_GROUP_REGEX.test(field)) {
+						// The problem is with one of the match listings in the group.
+						errorReport.sheetName = 'group_matches';
+						errorReport.id = `group-id-${culpritObject.group_id}_match-num-${culpritObject.match}`;
+					}
 				}
 
 				// If the error is coming from one of the "_meta" columns, which is a JSON object,
