@@ -213,24 +213,21 @@ function handleProjectImport(project) {
 			replicant.validationErrors.forEach(error => {
 				const field = error.field.replace(/^data\./, '');
 				const columnName = calcColumnName(field);
-				const parentObject = objectPath.get(project[datasetName], field.split('.').slice(0, -1));
+				const culpritObject = error.type === 'object' ?
+					objectPath.get(project[datasetName], field.split('.')) :
+					objectPath.get(project[datasetName], field.split('.').slice(0, -1));
+				const primaryKeyName = getPrimaryKey(culpritObject);
+
 				const errorReport = {
 					sheetName: datasetName,
 					columnName,
-					id: parentObject.id || 'Unknown',
+					id: {}.hasOwnProperty.call(culpritObject, primaryKeyName) ? culpritObject[primaryKeyName] : 'Unknown',
 					validatorError: error
 				};
 
-				// Errors in player objects are a special case, because the way we store players/rosters is
-				// completely different from how the sheet stores them. This means that we have to do a
-				// little extra work to map these errors back to the sheet in a way that makes sense.
 				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
+					// The problem is with one of the players listings in the roster.
 					errorReport.sheetName = 'players';
-					errorReport.id = parentObject.user_id || 'Unknown';
-				}
-
-				if (datasetName === 'players') {
-					errorReport.id = parentObject.user_id || 'Unknown';
 				}
 
 				// If the error is coming from one of the "_meta" columns, which is a JSON object,
@@ -286,4 +283,27 @@ function calcNumErrors() {
 
 function calcColumnName(field) {
 	return field.match(COLUMN_NAME_REGEX)[0].replace('.', '');
+}
+
+/**
+ * Finds the key to use as the primary key (aka "ID key") for an object.
+ * The default key used in most sheets is simply "id".
+ * However, other sheets may use "player_id", or "group_id" as their primary keys.
+ *
+ * This algorithm assumes that if an "id" field exists, then that must be the primary key.
+ * Else, it returns the first field which ends with "_id".
+ *
+ * @param object
+ * @returns {string | undefined}
+ */
+function getPrimaryKey(object) {
+	const DEFAULT_ID = 'id';
+	const keys = Object.keys(object);
+	if (keys.includes(DEFAULT_ID)) {
+		return DEFAULT_ID;
+	}
+
+	return Object.keys(object).find(key => {
+		return key.endsWith('_id');
+	});
 }
