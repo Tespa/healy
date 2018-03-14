@@ -15,6 +15,7 @@ module.exports = function (workbook) {
 	};
 
 	workbook.sheets.forEach(sheet => {
+		// Ignore empty sheets.
 		if (!sheet.values[0]) {
 			formattedData[_snakeCase(sheet.name)] = [];
 			return;
@@ -22,6 +23,7 @@ module.exports = function (workbook) {
 
 		// Normalize all column names to snake_case.
 		const columnNames = sheet.values[0].map(columnName => {
+			// Ignore "private" columns (ones beginning with an underscore).
 			if (columnName && columnName.startsWith('_')) {
 				return columnName;
 			}
