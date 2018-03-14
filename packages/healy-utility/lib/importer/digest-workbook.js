@@ -124,13 +124,42 @@ module.exports = function (workbook) {
 		});
 	});
 
-	// Make it so that non-team games don't explode this code.
-	formattedData.teams = formattedData.teams || [];
+	// Process teams and players.
+	const {formattedTeams, formattedPlayers} = processTeamsAndPlayers(formattedData.teams, formattedData.players);
+	formattedData.teams = formattedTeams;
+	formattedData.players = formattedPlayers;
 
-	// This is pretty inefficient and I could be saving cycles here if necessary.
-	// For now, this gets the job done.
+	if (formattedData.ticker) {
+		// Process ticker data.
+		const tickerRows = formattedData.ticker;
+		formattedData.ticker = [];
+		tickerRows.forEach(row => {
+			let group = formattedData.ticker.find(group => group.id === row.group);
+			if (!group) {
+				group = {id: row.group, items: []};
+				formattedData.ticker.push(group);
+			}
+
+			group.items.push(row);
+		});
+	}
+
+	// Return the final set of formatted data.
+	return formattedData;
+};
+
+/**
+ * Translates team and player data from the Integration Sheet format into the Irvine Framework format.
+ * @param inputTeams {Array}
+ * @param inputPlayers {Array}
+ * @returns {{formattedTeams: Array, formattedPlayers: Array}}
+ */
+function processTeamsAndPlayers(inputTeams, inputPlayers) {
+	const outputTeams = inputTeams.slice(0);
+	let outputPlayers = [];
+
 	const teamsById = {};
-	formattedData.teams.forEach(team => {
+	inputTeams.forEach(team => {
 		team.entrantType = 'team';
 		team.entrantIdPath = 'id';
 		team.entrantLabelPath = 'name_short';
@@ -141,8 +170,8 @@ module.exports = function (workbook) {
 	// Do two things at once:
 	// 1) Remove players whom do not have a valid team id.
 	// 2) Add players to their team's roster.
-	if (formattedData.players) {
-		formattedData.players = formattedData.players.filter(player => {
+	if (inputPlayers) {
+		outputPlayers = inputPlayers.filter(player => {
 			player.entrantType = 'player';
 			player.entrantIdPath = 'user_id';
 			player.entrantLabelPath = 'handle';
@@ -153,21 +182,10 @@ module.exports = function (workbook) {
 
 			return false;
 		});
-	} else {
-		formattedData.players = [];
 	}
 
-	const tickerRows = formattedData.ticker;
-	formattedData.ticker = [];
-	tickerRows.forEach(row => {
-		let group = formattedData.ticker.find(group => group.id === row.group);
-		if (!group) {
-			group = {id: row.group, items: []};
-			formattedData.ticker.push(group);
-		}
-
-		group.items.push(row);
-	});
-
-	return formattedData;
-};
+	return {
+		formattedTeams: outputTeams,
+		formattedPlayers: outputPlayers
+	};
+}
