@@ -182,7 +182,7 @@ function handleProjectImport(project) {
 	replicants.metadata.value = Object.assign({
 		// Only update lastPollTime if the new metadata specifies one.
 		lastPollTime: replicants.metadata.value.lastPollTime
-	}, project.metadata);
+	}, project._metadata);
 	replicants.metadata.value.updating = false;
 
 	const validationErrors = [];
