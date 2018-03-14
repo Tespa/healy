@@ -37,7 +37,18 @@ test.cb('importing a project from Google Drive', t => {
 			t.fail(err);
 		} else {
 			const replicants = require('../../lib/util/replicants');
-			const fixture = JSON.parse(fs.readFileSync('test/fixtures/nominal-zip.json', 'utf-8'));
+
+			/* eslint-disable spaced-comment */
+			// Uncomment this to write a new fixture.
+			/*const foo = {};
+			foo.metadata = replicants.metadata.value;
+			Object.entries(nominalHelpers.healyOptions.replicantMappings).forEach(([key, replicant]) => {
+				foo[key] = replicant.value;
+			});
+			fs.writeFileSync('test/fixtures/nominal-gdrive.json', JSON.stringify(foo, null, 2), 'utf8');*/
+			/* eslint-enable spaced-comment */
+
+			const fixture = JSON.parse(fs.readFileSync('test/fixtures/nominal-gdrive.json', 'utf8'));
 			t.deepEqual(replicants.errors.value, {
 				imageErrors: [],
 				validationErrors: []
