@@ -11,7 +11,7 @@ const log = new nodecg.Logger('healy');
 
 module.exports = function (workbook) {
 	const formattedData = {
-		metadata: workbook.metadata
+		_metadata: workbook.metadata
 	};
 
 	workbook.sheets.forEach(sheet => {
