@@ -3,6 +3,8 @@
 // Packages
 const app = require('express')();
 const cacache = require('cacache');
+const clone = require('clone');
+const ssri = require('ssri');
 
 // Ours
 const isCached = require('./is-cached');
@@ -15,13 +17,21 @@ app.get(`/${nodecg.bundleName}/cache/:hash`, async (req, res) => {
 	try {
 		const hash = req.params.hash;
 		const variant = req.query.variant;
+		const returnHash = 'returnHash' in req.query && req.query.returnHash !== 'false';
 		if (!await isCached(hash, variant)) {
 			return res.sendStatus(404);
 		}
 
 		if (variant) {
 			cacache.get(cachePath, `${hash}_${variant}`).then(info => {
-				res.send(info.data);
+				if (returnHash) {
+					const clonedInfo = clone(info);
+					delete clonedInfo.data;
+					clonedInfo.hexDigest = ssri.parse(clonedInfo.integrity).hexDigest();
+					res.send(clonedInfo);
+				} else {
+					res.send(info.data);
+				}
 			}).catch(err => {
 				errorHandler(err, res);
 			});
