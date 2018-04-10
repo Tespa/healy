@@ -187,6 +187,8 @@ function processTeamsAndPlayers(inputTeams, inputPlayers) {
 			player.entrantType = 'player';
 			player.entrantIdPath = 'user_id';
 			player.entrantLabelPath = 'handle';
+
+			// Warning: this _silently_ drops players who do not belong to a valid team!
 			if (teamsById[player.team_id]) {
 				teamsById[player.team_id].roster.push(player);
 				return true;
