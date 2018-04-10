@@ -47,3 +47,5 @@ module.exports.init = async function (nodecg, opts) {
 	// Yeah, this is weird, but we have to intentionally delay this until we have the nodecg API context.
 	module.exports.addToCache = require('./lib/cache/add-to-cache');
 };
+
+module.exports.ErrorTypes = require('./lib/error-types');
