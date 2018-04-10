@@ -59,8 +59,8 @@ class HealyWidgetError extends Polymer.MutableData(Polymer.Element) {
 			`<a href="https://drive.google.com/open?id=${fileName}" target="_blank"><pre>${fileName}</pre></a>` :
 			`<pre>${fileName}</pre>`;
 
-		if (error.message.startsWith('Team logo image')) {
-			msg = `Team logo image ${pre} is not an export from the Photoshop template.`;
+		if (error.code === 'ENOTTEMPLATE') {
+			msg = `Image ${pre} is not an export from the expected Photoshop template.`;
 		} else if (error.code === 404) {
 			msg = `404 file not found: ${pre}`;
 		} else {
