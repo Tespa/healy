@@ -43,7 +43,12 @@
 						},
 						"value": {},
 						"type": {
-							"type": "string"
+							"oneOf": [{
+								"type": "string"
+							}, {
+								"type": "array",
+								"items": "string"
+							}]
 						},
 						"field": {
 							"type": "string"
