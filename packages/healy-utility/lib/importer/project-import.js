@@ -167,6 +167,7 @@ function doUpdateGoogleSheet(opts) {
 		}
 
 		// Use an interval instead of a timeout so that it keeps trying if there is an error.
+		clearInterval(googlePollInterval);
 		googlePollInterval = setInterval(doUpdateGoogleSheet, 60000);
 		replicants.metadata.value.lastPollTime = Date.now();
 		replicants.metadata.value.updating = false;
@@ -174,6 +175,7 @@ function doUpdateGoogleSheet(opts) {
 		log.error('Error updating spreadsheet:\n', (err && err.stack) ? err.stack : err);
 
 		// Use an interval instead of a timeout so that it keeps trying if there is an error.
+		clearInterval(googlePollInterval);
 		googlePollInterval = setInterval(doUpdateGoogleSheet, 60000);
 		replicants.metadata.value.lastPollTime = Date.now();
 		replicants.metadata.value.updating = false;
