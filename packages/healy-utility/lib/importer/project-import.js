@@ -190,78 +190,116 @@ function handleProjectImport(project) {
 	replicants.metadata.value.updating = false;
 
 	const validationErrors = [];
+	const newValuesMap = new Map();
+	const replicantsMap = new Map();
 
 	// On the first loop, just validate. We do an atomic update where we only
 	// update the replicants if every single one of them passes validation with their new value.
-	for (const datasetName in importerOptions.replicantMappings) {
-		if (!{}.hasOwnProperty.call(importerOptions.replicantMappings, datasetName)) {
+	for (const sheetName in importerOptions.replicantMappings) {
+		if (!{}.hasOwnProperty.call(importerOptions.replicantMappings, sheetName)) {
 			continue;
 		}
 
-		const replicant = importerOptions.replicantMappings[datasetName];
-		if (!{}.hasOwnProperty.call(project, datasetName)) {
-			log.error('Replicant %s is mapped to non-existent dataset "%s"', replicant.name, datasetName);
+
+		// We support either directly supplying a Replicant, or
+		// supplying an object which defines both a "replicant" and a "processor".
+		// This bit of code handles figuring out what is the replicant and what is the processor, if any.
+		let replicant;
+		let processor;
+		const mapping = importerOptions.replicantMappings[sheetName];
+		if (mapping.constructor.name === 'Replicant' || mapping.constructor.name === 'MockReplicant') {
+			replicant = mapping;
+		} else if (typeof mapping === 'object') {
+			if (!{}.hasOwnProperty.call(mapping, 'replicant')) {
+				throw new Error('Mapping object must specify a "replicant" key');
+			}
+
+			replicant = mapping.replicant;
+
+			if (mapping.processor) {
+				if (typeof mapping.processor === 'function') {
+					processor = mapping.processor;
+				} else {
+					throw new Error('Mapping processor must be a function');
+				}
+			}
+		} else {
+			throw new Error('Unexpected mapping value, please check your replicantMappings.');
+		}
+
+		if (!{}.hasOwnProperty.call(project, sheetName)) {
+			log.error('Replicant %s is mapped to non-existent dataset "%s"', replicant.name, sheetName);
 			return;
 		}
 
+		replicantsMap.set(sheetName, replicant);
+
+		const newValue = processor ?
+			processor(project[sheetName]) :
+			project[sheetName];
+
 		// Don't assign the new value if it is equal to the existing value.
-		if (equal(replicant.value, project[datasetName])) {
+		if (equal(replicant.value, newValue)) {
 			continue;
 		}
 
-		const result = replicant.validate(project[datasetName], {
+		const validationPassed = replicant.validate(newValue, {
 			throwOnInvalid: false
 		});
 
-		if (!result) {
-			replicant.validationErrors.forEach(error => {
-				const field = error.field.replace(/^data\./, '');
-				const columnName = calcColumnName(field);
-				const culpritObject = error.type === 'object' ?
-					objectPath.get(project[datasetName], field.split('.')) :
-					objectPath.get(project[datasetName], field.split('.').slice(0, -1));
-				const primaryKeyName = getPrimaryKey(culpritObject);
-
-				const errorReport = {
-					sheetName: datasetName,
-					columnName,
-					id: {}.hasOwnProperty.call(culpritObject, primaryKeyName) ? culpritObject[primaryKeyName] : 'Unknown',
-					validatorError: error
-				};
-
-				if (datasetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
-					// The problem is with one of the players listings in the roster.
-					errorReport.sheetName = 'players';
-				}
-
-				if (datasetName === 'groups') {
-					if (PLAYER_IN_GROUP_REGEX.test(field)) {
-						// The problem is with one of the player listings in the group.
-						errorReport.sheetName = 'group_players';
-						errorReport.id = `group-id-${culpritObject.group_id}_user-id-${culpritObject.user_id}`;
-					} else if (MATCH_IN_GROUP_REGEX.test(field)) {
-						// The problem is with one of the match listings in the group.
-						errorReport.sheetName = 'group_matches';
-						errorReport.id = `group-id-${culpritObject.group_id}_match-num-${culpritObject.match}`;
-					}
-				}
-
-				// If the error is coming from one of the "_meta" columns, which is a JSON object,
-				// we have to a little extra work to grab the correct row ID to report.
-				const metaColumnMatches = field.match(META_COLUMN_NAME_REGEX);
-				const metaColumnName = (metaColumnMatches && metaColumnMatches.length) > 0 ?
-					metaColumnMatches[0] :
-					null;
-				if (metaColumnName) {
-					const pathParts = field.split('.');
-					const metaIndex = pathParts.findIndex(part => part.endsWith('_meta'));
-					errorReport.id = objectPath.get(project[datasetName], pathParts.slice(0, metaIndex)).id || 'Unknown';
-					errorReport.metaColumnName = metaColumnName;
-				}
-
-				validationErrors.push(errorReport);
-			});
+		if (validationPassed) {
+			newValuesMap.set(sheetName, newValue);
+			continue;
 		}
+
+		// If we're here, then we had validation errors and we need to format & report them.
+		replicant.validationErrors.forEach(error => {
+			const field = error.field.replace(/^data\./, '');
+			const columnName = calcColumnName(field);
+			const culpritObject = error.type === 'object' ?
+				objectPath.get(newValue, field.split('.')) :
+				objectPath.get(newValue, field.split('.').slice(0, -1));
+			const primaryKeyName = getPrimaryKey(culpritObject);
+
+			const errorReport = {
+				sheetName,
+				columnName,
+				id: {}.hasOwnProperty.call(culpritObject, primaryKeyName) ? culpritObject[primaryKeyName] : 'Unknown',
+				validatorError: error
+			};
+
+			if (sheetName === 'teams' && PLAYER_IN_ROSTER_REGEX.test(field)) {
+				// The problem is with one of the players listings in the roster.
+				errorReport.sheetName = 'players';
+			}
+
+			if (sheetName === 'groups') {
+				if (PLAYER_IN_GROUP_REGEX.test(field)) {
+					// The problem is with one of the player listings in the group.
+					errorReport.sheetName = 'group_players';
+					errorReport.id = `group-id-${culpritObject.group_id}_user-id-${culpritObject.user_id}`;
+				} else if (MATCH_IN_GROUP_REGEX.test(field)) {
+					// The problem is with one of the match listings in the group.
+					errorReport.sheetName = 'group_matches';
+					errorReport.id = `group-id-${culpritObject.group_id}_match-num-${culpritObject.match}`;
+				}
+			}
+
+			// If the error is coming from one of the "_meta" columns, which is a JSON object,
+			// we have to a little extra work to grab the correct row ID to report.
+			const metaColumnMatches = field.match(META_COLUMN_NAME_REGEX);
+			const metaColumnName = (metaColumnMatches && metaColumnMatches.length) > 0 ?
+				metaColumnMatches[0] :
+				null;
+			if (metaColumnName) {
+				const pathParts = field.split('.');
+				const metaIndex = pathParts.findIndex(part => part.endsWith('_meta'));
+				errorReport.id = objectPath.get(newValue, pathParts.slice(0, metaIndex)).id || 'Unknown';
+				errorReport.metaColumnName = metaColumnName;
+			}
+
+			validationErrors.push(errorReport);
+		});
 	}
 
 	replicants.errors.value.validationErrors = validationErrors;
@@ -277,7 +315,10 @@ function handleProjectImport(project) {
 				continue;
 			}
 
-			importerOptions.replicantMappings[sheetName].value = clone(project[sheetName]);
+			if (newValuesMap.has(sheetName)) {
+				const replicant = replicantsMap.get(sheetName);
+				replicant.value = clone(newValuesMap.get(sheetName));
+			}
 		}
 
 		emitter.emit('projectImported', project);
