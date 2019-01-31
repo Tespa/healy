@@ -23,7 +23,8 @@ module.exports = async function ({fileId, fileHash, hashAlgorithm = 'md5'}) {
 			buffer = await driveApi.files.get({ // eslint-disable-line no-await-in-loop
 				fileId,
 				alt: 'media',
-				auth: authClient
+				auth: authClient,
+				supportsTeamDrives: true
 			}, {
 				encoding: null
 			});
