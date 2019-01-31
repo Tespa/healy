@@ -45,7 +45,8 @@ async function ingestGoogleSheet(fileId, {force = false} = {}) {
 	const gdriveFileData = await driveApi.files.get({
 		fileId: key,
 		fields: 'modifiedTime',
-		auth: authClient
+		auth: authClient,
+		supportsTeamDrives: true
 	});
 	const modifiedTime = Date.parse(gdriveFileData.modifiedTime);
 
