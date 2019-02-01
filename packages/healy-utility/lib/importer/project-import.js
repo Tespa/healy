@@ -354,10 +354,12 @@ function calcColumnName(field) {
  * @returns {string | undefined}
  */
 function getPrimaryKey(object) {
-	const DEFAULT_ID = 'id';
+	const DEFAULT_IDS = ['id', 'key'];
 	const keys = Object.keys(object);
-	if (keys.includes(DEFAULT_ID)) {
-		return DEFAULT_ID;
+	for (const defaultId of DEFAULT_IDS) {
+		if (keys.includes(defaultId)) {
+			return defaultId;
+		}
 	}
 
 	return Object.keys(object).find(key => {
