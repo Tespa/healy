@@ -17,8 +17,7 @@ addons:
       - coreutils
       - google-chrome-stable
 before_install:
-  - npm install -g bower@latest
-  - npm install -g lerna@^2
+  - npm install -g bower@latest nyc@latest lerna@^2
   - lerna bootstrap
   - cd packages/healy-widget
   - bower install
