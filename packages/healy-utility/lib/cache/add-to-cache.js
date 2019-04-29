@@ -6,7 +6,7 @@ const cacache = require('cacache');
 // Ours
 const cachePath = require('./cache-path');
 
-module.exports = async function (buffer, {key, fileName, hash, folder, hashAlgorithm = 'md5', processor}) {
+module.exports = async function (buffer, {key, fileName, fileType, hash, folder, hashAlgorithm = 'md5', processor}) {
 	if (!Buffer.isBuffer(buffer)) {
 		throw new Error(`Argument "buffer" must be of type "buffer", got a(n) "${typeof buffer}"`);
 	} else if (typeof fileName !== 'string') {
@@ -44,6 +44,7 @@ module.exports = async function (buffer, {key, fileName, hash, folder, hashAlgor
 			hash,
 			hashAlgorithm,
 			fileName,
+			fileType,
 			folder
 		}
 	};

@@ -127,6 +127,7 @@ async function cacheImageFromZip(entry, readStream) {
 			const {buffer, hash} = await streamToBuffer(readStream);
 			return addToCache(buffer, {
 				fileName: entry.fileName,
+				fileType: entry.fileName.split('.').pop(),
 				folder: bottomFolder,
 				hash,
 				processor
