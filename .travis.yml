@@ -20,6 +20,8 @@ before_install:
   - npm install -g bower
   - npm install -g lerna@^2
   - lerna bootstrap
+  - cd packages/healy-widget
+  - bower install
 before_script:
   - echo "$GOOGLE_CREDENTIALS_BASE64" | base64 --decode > google-application-credentials.json
 script:
