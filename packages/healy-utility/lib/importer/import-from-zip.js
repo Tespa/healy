@@ -83,7 +83,8 @@ async function ingestZip({zipPath, lastModified, originalName}) {
 					entry.fileName.endsWith('.jpg') ||
 					entry.fileName.endsWith('.jpeg') ||
 					entry.fileName.endsWith('.webp') ||
-					entry.fileName.endsWith('.gif')) {
+					entry.fileName.endsWith('.gif') ||
+					entry.filename.endsWith('.svg')) {
 					cacheImageFromZip(entry, readStream).then(() => {
 						zipfile.readEntry();
 					}).catch(error => {
