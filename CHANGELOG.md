@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.4](https://github.com/Tespa/healy/compare/v2.0.3...v2.0.4) (2019-04-30)
+
+
+### Bug Fixes
+
+* **package:** fix audit warnings in prodDeps ([7230180](https://github.com/Tespa/healy/commit/7230180))
+
+
+
+
+
 ## [2.0.3](https://github.com/Tespa/healy/compare/v2.0.2...v2.0.3) (2019-04-30)
 
 
