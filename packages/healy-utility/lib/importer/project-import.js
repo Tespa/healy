@@ -14,7 +14,6 @@ const equal = require('fast-deep-equal');
 const EventEmitter2 = require('eventemitter2').EventEmitter2;
 const multer = require('multer');
 const objectPath = require('object-path');
-const parseGoogleSheetsKey = require('google-spreadsheets-key-parser');
 
 // Ours
 const cachePath = require('../cache/cache-path');
@@ -25,6 +24,7 @@ const nodecg = require('../util/nodecg-api-context').get();
 const queue = require('../util/queue');
 const replicants = require('../util/replicants');
 const reprocessImages = require('./reprocess-images');
+const parseGoogleSheetsKey = require('../util/google-spreadsheets-key-parser');
 
 let googlePollInterval;
 const log = new nodecg.Logger('healy');
