@@ -119,6 +119,7 @@ function cacheProjectImagesFromGoogleDrive(project) {
 				}).then(buffer => {
 					return addToCache(buffer, {
 						fileName: metadata.id,
+						fileType: metadata.extension,
 						folder: job.folder,
 						hash: metadata.md5,
 						processor: job.processor

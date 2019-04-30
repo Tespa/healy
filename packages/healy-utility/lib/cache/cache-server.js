@@ -22,27 +22,30 @@ app.get(`/${nodecg.bundleName}/cache/:hash`, async (req, res) => {
 			return res.sendStatus(404);
 		}
 
+		let key = hash;
 		if (variant) {
-			cacache.get(cachePath, `${hash}_${variant}`).then(info => {
-				if (returnHash) {
-					const clonedInfo = clone(info);
-					delete clonedInfo.data;
-					clonedInfo.hexDigest = ssri.parse(clonedInfo.integrity).hexDigest();
-					res.send(clonedInfo);
-				} else {
-					res.send(info.data);
-				}
-			}).catch(err => {
-				errorHandler(err, res);
-			});
+			key += `_${variant}`;
+		}
+
+		const info = await cacache.get(cachePath, key);
+		if (returnHash) {
+			const clonedInfo = clone(info);
+			delete clonedInfo.data;
+			clonedInfo.hexDigest = ssri.parse(clonedInfo.integrity).hexDigest();
+			res.send(clonedInfo);
 			return;
 		}
 
-		cacache.get.stream.byDigest(cachePath, 'md5-' + Buffer.from(hash, 'hex').toString('base64'))
-			.pipe(res)
-			.on('error', err => {
-				errorHandler(err, res);
-			});
+		if (info.metadata && info.metadata.fileType) {
+			// SVG files _must_ have a proper content-type set, otherwise the browser will not display them.
+			// Its less important to set the content-type for other formats, as the browser seems to be able to figure them out.
+			// Still, it certainly doesn't hurt.
+			// We're lucky that express uses a `mime.lookup()` function to determine the correct content type 
+			// based on the file extension, so that's all we have to pass in here.
+			res.type(info.metadata.fileType.toLowerCase());
+		}
+
+		res.send(info.data);
 	} catch (err) {
 		if (err.code === 'ENOENT') {
 			return res.sendStatus(404);
