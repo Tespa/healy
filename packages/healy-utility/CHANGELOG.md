@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.6](https://github.com/Tespa/healy/compare/v2.0.5...v2.0.6) (2019-04-30)
+
+
+### Bug Fixes
+
+* **package:** alright, you win npm ([5b353d2](https://github.com/Tespa/healy/commit/5b353d2))
+
+
+
+
+
 ## [2.0.5](https://github.com/Tespa/healy/compare/v2.0.4...v2.0.5) (2019-04-30)
 
 
