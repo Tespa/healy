@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "cacache": "^9.2.9",
+    "cacache": "^11.3.2",
     "clone": "^2.1.1",
     "eventemitter2": "^4.1.2",
     "express": "^4.15.3",
@@ -25,7 +25,7 @@
     "p-queue": "^1.1.0",
     "promise-retry": "^1.1.1",
     "serialize-error": "^2.1.0",
-    "ssri": "^4.1.6",
+    "ssri": "^6.0.1",
     "stopcock": "^1.0.0",
     "stream-buffers": "^3.0.1",
     "xlsx": "^0.10.8",
