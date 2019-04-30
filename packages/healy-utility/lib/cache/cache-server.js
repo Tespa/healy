@@ -40,7 +40,7 @@ app.get(`/${nodecg.bundleName}/cache/:hash`, async (req, res) => {
 			// SVG files _must_ have a proper content-type set, otherwise the browser will not display them.
 			// Its less important to set the content-type for other formats, as the browser seems to be able to figure them out.
 			// Still, it certainly doesn't hurt.
-			// We're lucky that express uses a `mime.lookup()` function to determine the correct content type 
+			// We're lucky that express uses a `mime.lookup()` function to determine the correct content type
 			// based on the file extension, so that's all we have to pass in here.
 			res.type(info.metadata.fileType.toLowerCase());
 		}
@@ -74,14 +74,5 @@ app.get(`/${nodecg.bundleName}/checkCache`, async (req, res) => {
 		res.sendStatus(500);
 	});
 });
-
-function errorHandler(error, res) {
-	if (error.code === 'ENOENT') {
-		return res.sendStatus(404);
-	}
-
-	log.error('Failed to serve file from cache:\n', error.stack ? error.stack : error);
-	res.sendStatus(500);
-}
 
 nodecg.mount(app);

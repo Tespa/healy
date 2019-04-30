@@ -200,7 +200,6 @@ function handleProjectImport(project) {
 			continue;
 		}
 
-
 		// We support either directly supplying a Replicant, or
 		// supplying an object which defines both a "replicant" and a "processor".
 		// This bit of code handles figuring out what is the replicant and what is the processor, if any.
