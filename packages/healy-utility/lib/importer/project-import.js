@@ -255,9 +255,7 @@ function handleProjectImport(project) {
 		replicant.validationErrors.forEach(error => {
 			const field = error.field.replace(/^data\./, '');
 			const columnName = calcColumnName(field);
-			const culpritObject = error.type === 'object' ?
-				objectPath.get(newValue, field.split('.')) :
-				objectPath.get(newValue, field.split('.').slice(0, -1));
+			const culpritObject = objectPath.get(newValue, field.split('.').slice(0, -1));
 			const primaryKeyName = getPrimaryKey(culpritObject);
 
 			const errorReport = {
