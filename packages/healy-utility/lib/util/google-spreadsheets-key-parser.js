@@ -9,7 +9,7 @@ function parse(str) {
 		return {key: str};
 	}
 
-	const parsed = url.parse(str, true)
+	const parsed = url.parse(str, true);
 	if (parsed.query.key) {
 		isNew = false;
 		key = parsed.query.key;
