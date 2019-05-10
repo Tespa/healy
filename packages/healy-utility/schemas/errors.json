@@ -47,11 +47,16 @@
 								"type": "string"
 							}, {
 								"type": "array",
-								"items": "string"
+								"items": {
+									"type": "string"
+								}
 							}]
 						},
 						"field": {
 							"type": "string"
+						},
+						"schemaPath": {
+							"type": "array"
 						}
 					}
 				}
