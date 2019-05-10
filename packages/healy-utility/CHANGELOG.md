@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.7](https://github.com/Tespa/healy/compare/v2.0.6...v2.0.7) (2019-05-10)
+
+
+### Bug Fixes
+
+* **errors:** fix error summary not working ([#5](https://github.com/Tespa/healy/issues/5)) ([7a255ac](https://github.com/Tespa/healy/commit/7a255ac))
+
+
+
+
+
 ## [2.0.6](https://github.com/Tespa/healy/compare/v2.0.5...v2.0.6) (2019-04-30)
 
 
