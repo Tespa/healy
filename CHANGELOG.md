@@ -3,58 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [2.0.7](https://github.com/Tespa/healy/compare/v2.0.6...v2.0.7) (2019-05-10)
+<a name="2.0.8"></a>
+## [2.0.8](https://github.com/Tespa/healy/compare/v2.0.7...v2.0.8) (2020-12-12)
 
 
 ### Bug Fixes
 
-* **errors:** fix error summary not working ([#5](https://github.com/Tespa/healy/issues/5)) ([7a255ac](https://github.com/Tespa/healy/commit/7a255ac))
-
-
-
-
-
-## [2.0.6](https://github.com/Tespa/healy/compare/v2.0.5...v2.0.6) (2019-04-30)
-
-
-### Bug Fixes
-
-* **package:** alright, you win npm ([5b353d2](https://github.com/Tespa/healy/commit/5b353d2))
-
-
-
-
-
-## [2.0.5](https://github.com/Tespa/healy/compare/v2.0.4...v2.0.5) (2019-04-30)
-
-
-### Bug Fixes
-
-* **package:** seriously, don't install tape ([db4f84f](https://github.com/Tespa/healy/commit/db4f84f))
-
-
-
-
-
-## [2.0.4](https://github.com/Tespa/healy/compare/v2.0.3...v2.0.4) (2019-04-30)
-
-
-### Bug Fixes
-
-* **package:** fix audit warnings in prodDeps ([7230180](https://github.com/Tespa/healy/commit/7230180))
-
-
-
-
-
-## [2.0.3](https://github.com/Tespa/healy/compare/v2.0.2...v2.0.3) (2019-04-30)
-
-
-### Bug Fixes
-
-* **cache-server:** serve images with the correct content-type header ([#4](https://github.com/Tespa/healy/issues/4)) ([4dfe537](https://github.com/Tespa/healy/commit/4dfe537))
-* **zip-import:** treat SVG files as images ([#3](https://github.com/Tespa/healy/issues/3)) ([d119e51](https://github.com/Tespa/healy/commit/d119e51))
-
+* **bower:** add test-fixture resolutions ([53ebd5b](https://github.com/Tespa/healy/commit/53ebd5b))
+* **deps:** use yarn workspaces, use node-fetch ([dd42821](https://github.com/Tespa/healy/commit/dd42821))
 
 
 

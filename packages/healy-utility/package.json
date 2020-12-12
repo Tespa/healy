@@ -1,6 +1,6 @@
 {
   "name": "healy-utility",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "main": "index.js",
   "directories": {
     "lib": "lib"
@@ -33,9 +33,9 @@
   "devDependencies": {
     "ava": "^0.21.0",
     "form-data": "^2.2.0",
-    "node-fetch": "^2.6.1",
     "mock-nodecg": "^1.8.1",
     "mockery": "^2.1.0",
+    "node-fetch": "^2.6.1",
     "tmp": "0.0.31"
   },
   "files": [

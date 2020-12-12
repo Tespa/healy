@@ -1,7 +1,19 @@
 # Change Log
 
 All notable changes to this project will be documented in this file.
-See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+<a name="2.0.8"></a>
+## [2.0.8](https://github.com/Tespa/healy/compare/v2.0.7...v2.0.8) (2020-12-12)
+
+
+### Bug Fixes
+
+* **bower:** add test-fixture resolutions ([53ebd5b](https://github.com/Tespa/healy/commit/53ebd5b))
+* **deps:** use yarn workspaces, use node-fetch ([dd42821](https://github.com/Tespa/healy/commit/dd42821))
+
+
+
 
 <a name="2.0.1"></a>
 ## 2.0.1 (2019-01-31)
