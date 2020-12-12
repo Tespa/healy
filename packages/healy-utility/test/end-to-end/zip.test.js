@@ -8,7 +8,7 @@ const path = require('path');
 
 // Packages
 const express = require('express');
-const fetch = require('make-fetch-happen');
+const fetch = require('node-fetch');
 const FormData = require('form-data');
 const mockery = require('mockery');
 const test = require('ava');
