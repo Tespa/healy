@@ -24,7 +24,7 @@
     "p-queue": "^1.1.0",
     "promise-retry": "^1.1.1",
     "serialize-error": "^2.1.0",
-    "ssri": "^6.0.1",
+    "ssri": "^8.0.1",
     "stopcock": "^1.0.0",
     "stream-buffers": "^3.0.1",
     "xlsx": "^0.10.8",
