@@ -27,7 +27,7 @@
     "ssri": "^6.0.1",
     "stopcock": "^1.0.0",
     "stream-buffers": "^3.0.1",
-    "xlsx": "^0.10.8",
+    "xlsx": "^0.17.0",
     "yauzl": "^2.8.0"
   },
   "devDependencies": {
